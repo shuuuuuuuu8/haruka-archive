@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600&family=Noto+Serif+JP:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg: #f6f4ef;
+  --color-bg-card: #fffdf8;
+  --color-text: #1d1c19;
+  --color-text-muted: #5f5a51;
+  --color-accent: #8f3f2b;
+  --color-accent-light: #b86445;
+  --color-accent-pale: #f3dfd4;
+  --color-border: #d8d0c2;
+  --color-success: #3f6f58;
+  --font-serif: 'Noto Serif JP', serif;
+  --font-sans: 'Noto Sans JP', system-ui, sans-serif;
+}
+
+:root {
+  --bg: #f6f4ef;
+  --bg-card: #fffdf8;
+  --text: #1d1c19;
+  --text-muted: #5f5a51;
+  --accent: #8f3f2b;
+  --accent-light: #b86445;
+  --accent-pale: #f3dfd4;
+  --border: #d8d0c2;
+  --success: #3f6f58;
+  --ink: #24343d;
+  --sage: #6f7f68;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans JP', system-ui, sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Noto Serif JP', serif;
+}
+
+::selection {
+  background-color: var(--accent-pale);
+  color: var(--text);
+}
