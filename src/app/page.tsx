@@ -1,13 +1,20 @@
 import Link from 'next/link'
 import { ArrowRight, CheckCircle, ExternalLink, MessageSquare, Search, Sparkles } from 'lucide-react'
-import MaterialCard from '@/components/materials/MaterialCard'
 import { MATERIALS, PARTNERS } from '@/lib/data'
+import type { MaterialCategory } from '@/types/material'
 
 const TRUST_ITEMS = ['閲覧・検索は無料', '直接販売ではなく相談制', 'BtoBの商品開発向け', '遙が提供元と利用企業を仲介']
 const USE_CASES = ['アパレル・バッグの商品開発', 'ホテル・店舗向けインテリア', '海外向けの限定企画', '老舗との共創プロジェクト']
+const CATEGORY_ORDER: MaterialCategory[] = ['帯地', '絹', '綿', '麻', '反物', '和紙', '古布', '工芸素材', 'その他']
+const CATEGORY_LABELS: Partial<Record<MaterialCategory, string>> = {
+  帯地: '帯',
+}
 
 export default function Home() {
-  const featured = MATERIALS.filter((material) => material.isFeatured).slice(0, 3)
+  const categories = CATEGORY_ORDER.map((category) => {
+    const materials = MATERIALS.filter((material) => material.category === category)
+    return { category, materials }
+  }).filter(({ materials }) => materials.length > 0)
 
   return (
     <main style={{ backgroundColor: 'var(--bg)' }}>
@@ -89,15 +96,33 @@ export default function Home() {
               <p className="mb-2 text-xs tracking-[0.24em]" style={{ color: 'var(--accent)' }}>
                 MATERIALS
               </p>
-              <h2 className="text-3xl font-medium">注目の素材</h2>
+              <h2 className="text-3xl font-medium">素材カテゴリ</h2>
             </div>
             <Link href="/materials" className="inline-flex items-center gap-1 text-xs tracking-[0.14em]" style={{ color: 'var(--accent)' }}>
               すべて見る <ArrowRight size={14} />
             </Link>
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((material) => (
-              <MaterialCard key={material.id} material={material} />
+            {categories.map(({ category, materials }) => (
+              <Link
+                key={category}
+                href={`/materials?category=${encodeURIComponent(category)}`}
+                className="group flex min-h-48 flex-col justify-between border p-5 transition-colors"
+                style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg)' }}
+              >
+                <div>
+                  <p className="mb-3 text-[10px] tracking-[0.22em]" style={{ color: 'var(--text-muted)' }}>
+                    {materials.length} MATERIALS
+                  </p>
+                  <h3 className="font-serif text-3xl font-medium">{CATEGORY_LABELS[category] ?? category}</h3>
+                  <p className="mt-4 text-xs leading-6" style={{ color: 'var(--text-muted)' }}>
+                    {materials.slice(0, 3).map((material) => material.name).join(' / ')}
+                  </p>
+                </div>
+                <span className="mt-6 inline-flex items-center justify-end gap-1 text-[11px] tracking-[0.14em]" style={{ color: 'var(--accent)' }}>
+                  素材を見る <ArrowRight size={12} />
+                </span>
+              </Link>
             ))}
           </div>
         </div>

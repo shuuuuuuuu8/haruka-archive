@@ -1,18 +1,27 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Fuse from 'fuse.js'
 import { LayoutGrid, List, Search, SlidersHorizontal } from 'lucide-react'
 import FilterSidebar from '@/components/materials/FilterSidebar'
 import MaterialCard from '@/components/materials/MaterialCard'
 import { MATERIALS } from '@/lib/data'
-import type { Material, MaterialFilters } from '@/types/material'
+import type { Material, MaterialCategory, MaterialFilters } from '@/types/material'
 
 export default function MaterialsPage() {
   const [query, setQuery] = useState('')
   const [filters, setFilters] = useState<MaterialFilters>({})
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+
+  useEffect(() => {
+    const category = new URLSearchParams(window.location.search).get('category')
+    const categories = new Set(MATERIALS.map((material) => material.category))
+
+    if (category && categories.has(category as MaterialCategory)) {
+      setFilters((current) => ({ ...current, category: [category as MaterialCategory] }))
+    }
+  }, [])
 
   const fuse = useMemo(
     () =>
