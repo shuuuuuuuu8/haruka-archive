@@ -67,6 +67,7 @@ export interface Partner {
   story: string
   materialCount: number
   image?: string
+  websiteUrl?: string
 }
 
 export interface MaterialFilters {

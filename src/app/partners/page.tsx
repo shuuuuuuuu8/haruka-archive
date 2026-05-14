@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, MapPin, Package } from 'lucide-react'
+import { ArrowRight, ExternalLink, MapPin, Package } from 'lucide-react'
 import { MATERIALS, PARTNERS } from '@/lib/data'
 
 export default function PartnersPage() {
@@ -75,10 +75,23 @@ export default function PartnersPage() {
                       ))}
                     </div>
                   )}
-                  <Link href="/inquiry" className="mt-2 inline-flex items-center justify-between border px-3 py-2 text-xs" style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}>
-                    この提供元について相談する
-                    <ArrowRight size={13} />
-                  </Link>
+                  {partner.websiteUrl ? (
+                    <a
+                      href={partner.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-flex items-center justify-between border px-3 py-2 text-xs"
+                      style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}
+                    >
+                      丸屋の詳細を見る
+                      <ExternalLink size={13} />
+                    </a>
+                  ) : (
+                    <Link href="/inquiry" className="mt-2 inline-flex items-center justify-between border px-3 py-2 text-xs" style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}>
+                      この提供元について相談する
+                      <ArrowRight size={13} />
+                    </Link>
+                  )}
                 </div>
               </article>
             )

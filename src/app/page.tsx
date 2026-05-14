@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, CheckCircle, MessageSquare, Search, Sparkles } from 'lucide-react'
+import { ArrowRight, CheckCircle, ExternalLink, MessageSquare, Search, Sparkles } from 'lucide-react'
 import MaterialCard from '@/components/materials/MaterialCard'
 import { MATERIALS, PARTNERS } from '@/lib/data'
 
@@ -137,9 +137,16 @@ export default function Home() {
               一覧へ <ArrowRight size={14} />
             </Link>
           </div>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {PARTNERS.map((partner) => (
-              <article key={partner.id} className="border p-4" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
+              <a
+                key={partner.id}
+                href={partner.websiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border p-4 transition-colors"
+                style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}
+              >
                 <p className="font-serif text-lg">{partner.name}</p>
                 <p className="mt-1 text-[11px]" style={{ color: 'var(--accent)' }}>
                   {partner.founded}
@@ -147,7 +154,13 @@ export default function Home() {
                 <p className="mt-3 text-xs leading-6" style={{ color: 'var(--text-muted)' }}>
                   {partner.speciality}
                 </p>
-              </article>
+                <p className="mt-3 text-xs leading-6" style={{ color: 'var(--text-muted)' }}>
+                  {partner.story}
+                </p>
+                <span className="mt-4 inline-flex items-center gap-1 text-xs tracking-[0.14em]" style={{ color: 'var(--accent)' }}>
+                  詳細を見る <ExternalLink size={13} />
+                </span>
+              </a>
             ))}
           </div>
         </div>
