@@ -7,6 +7,8 @@ import { StatusBadge } from '@/components/ui/StatusBadge'
 import type { Material } from '@/types/material'
 
 export default function MaterialCard({ material }: { material: Material }) {
+  const shortDescription = material.story.length > 42 ? `${material.story.slice(0, 42)}...` : material.story
+
   return (
     <Link href={`/materials/${material.id}`} className="group block h-full">
       <article
@@ -41,6 +43,20 @@ export default function MaterialCard({ material }: { material: Material }) {
               <h3 className="mt-1 font-serif text-xl font-medium leading-snug">{material.name}</h3>
             </div>
           </div>
+        </div>
+        <div className="space-y-2 p-4">
+          <div>
+            <p className="text-[10px] tracking-[0.2em]" style={{ color: 'var(--text-muted)' }}>
+              {material.id}
+            </p>
+            <h3 className="mt-1 font-serif text-lg font-medium leading-snug">{material.name}</h3>
+          </div>
+          <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+            {material.materialType} / 訪問着用帯
+          </p>
+          <p className="text-xs leading-6" style={{ color: 'var(--text-muted)' }}>
+            {shortDescription}
+          </p>
         </div>
       </article>
     </Link>
