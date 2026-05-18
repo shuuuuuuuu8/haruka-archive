@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="border-t" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-3 sm:px-6">
         <div>
-          <p className="font-serif text-lg font-medium tracking-[0.12em]">遙 素材バンク</p>
+          <p className="font-serif text-lg font-medium tracking-[0.12em]">結 素材バンク</p>
           <p className="mt-3 text-xs leading-7" style={{ color: 'var(--text-muted)' }}>
             老舗や職人工房に眠る素材を可視化し、企業やクリエイターとの接点を生み出す検索・相談・共創の入口です。
           </p>
@@ -25,7 +25,7 @@ export default function Footer() {
             NOTE
           </p>
           <p className="text-xs leading-7" style={{ color: 'var(--text-muted)' }}>
-            このサイトはECではありません。購入、サンプル確認、ロット相談、共創企画は遙が間に入り調整します。
+            このサイトはECではありません。購入、サンプル確認、ロット相談、共創企画は結が間に入り調整します。
           </p>
         </div>
       </div>

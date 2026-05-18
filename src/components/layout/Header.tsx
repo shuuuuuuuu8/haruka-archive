@@ -38,10 +38,10 @@ export default function Header() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link href="/" className="flex min-w-0 flex-col">
           <span className="font-serif text-lg font-medium tracking-[0.18em]" style={{ color: 'var(--text)' }}>
-            遙 素材バンク
+            結 素材バンク
           </span>
           <span className="hidden text-[10px] tracking-[0.24em] uppercase sm:block" style={{ color: 'var(--text-muted)' }}>
-            Haruka Material Bank
+            Musubi Material Bank
           </span>
         </Link>
 

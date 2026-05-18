@@ -3,7 +3,7 @@ import { ArrowRight, CheckCircle, ExternalLink, MessageSquare, Search, Sparkles 
 import { MATERIALS, PARTNERS } from '@/lib/data'
 import type { MaterialCategory } from '@/types/material'
 
-const TRUST_ITEMS = ['閲覧・検索は無料', '直接販売ではなく相談制', 'BtoBの商品開発向け', '遙が提供元と利用企業を仲介']
+const TRUST_ITEMS = ['閲覧・検索は無料', '直接販売ではなく相談制', 'BtoBの商品開発向け', '結が提供元と利用企業を仲介']
 const USE_CASES = ['アパレル・バッグの商品開発', 'ホテル・店舗向けインテリア', '海外向けの限定企画', '老舗との共創プロジェクト']
 const CATEGORY_ORDER: MaterialCategory[] = ['帯地', '絹', '綿', '麻', '反物', '和紙', '古布', '工芸素材', 'その他']
 const CATEGORY_LABELS: Partial<Record<MaterialCategory, string>> = {
@@ -23,14 +23,14 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#1d1c19]/90 via-[#1d1c19]/65 to-[#1d1c19]/20" />
         <div className="relative mx-auto grid min-h-[620px] max-w-7xl items-center px-4 pb-20 sm:px-6 lg:grid-cols-[1fr_420px]">
           <div className="max-w-3xl pt-16 text-white">
-            <p className="mb-5 text-xs tracking-[0.28em] text-white/75">HARUKA MATERIAL BANK</p>
+            <p className="mb-5 text-xs tracking-[0.28em] text-white/75">MUSUBI MATERIAL BANK</p>
             <h1 className="text-4xl font-medium leading-tight sm:text-5xl lg:text-6xl">
               老舗に眠る素材を、
               <br />
               次のものづくりへ。
             </h1>
             <p className="mt-7 max-w-2xl text-sm leading-8 text-white/82">
-              絹、綿、麻、反物、帯地、和紙、古布、工芸素材。遙 素材バンクは、日本の老舗や職人工房に保管されてきた価値ある素材在庫を、企業・ブランド・デザイナーの新しい商品開発へつなぐBtoB向け素材プラットフォームです。
+              絹、綿、麻、反物、帯地、和紙、古布、工芸素材。結 素材バンクは、日本の老舗や職人工房に保管されてきた価値ある素材在庫を、企業・ブランド・デザイナーの新しい商品開発へつなぐBtoB向け素材プラットフォームです。
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/materials" className="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm tracking-[0.16em] text-white" style={{ backgroundColor: 'var(--accent)' }}>
@@ -83,7 +83,7 @@ export default function Home() {
               単なる在庫一覧ではなく、素材の種類、色柄、産地、年代、数量、価格帯、状態、背景ストーリー、活用可能性まで整理します。素材を探す人が「何に使えるか」まで想像できる状態にすることが、このサイトの役割です。
             </p>
             <p>
-              購入、サンプル確認、ロット相談、商品開発、老舗との共創企画については、遙が間に入り、素材提供元と利用企業・デザイナーをつなぎます。
+              購入、サンプル確認、ロット相談、商品開発、老舗との共創企画については、結が間に入り、素材提供元と利用企業・デザイナーをつなぎます。
             </p>
           </div>
         </div>
