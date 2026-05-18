@@ -25,7 +25,7 @@ export default function Footer() {
             NOTE
           </p>
           <p className="text-xs leading-7" style={{ color: 'var(--text-muted)' }}>
-            このサイトはECではありません。購入、サンプル確認、ロット相談、共創企画は結が間に入り調整します。
+            このサイトはECではありません。購入、サンプル確認、ロット相談、共創企画は遙が間に入り調整します。
           </p>
         </div>
       </div>

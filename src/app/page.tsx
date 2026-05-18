@@ -3,7 +3,7 @@ import { ArrowRight, CheckCircle, ExternalLink, MessageSquare, Search, Sparkles 
 import { MATERIALS, PARTNERS } from '@/lib/data'
 import type { MaterialCategory } from '@/types/material'
 
-const TRUST_ITEMS = ['閲覧・検索は無料', '直接販売ではなく相談制', 'BtoBの商品開発向け', '結が提供元と利用企業を仲介']
+const TRUST_ITEMS = ['閲覧・検索は無料', '直接販売ではなく相談制', 'BtoBの商品開発向け', '遙が提供元と利用企業を仲介']
 const USE_CASES = ['アパレル・バッグの商品開発', 'ホテル・店舗向けインテリア', '海外向けの限定企画', '老舗との共創プロジェクト']
 const CATEGORY_ORDER: MaterialCategory[] = ['帯地', '絹', '綿', '麻', '反物', '和紙', '古布', '工芸素材', 'その他']
 const CATEGORY_LABELS: Partial<Record<MaterialCategory, string>> = {
@@ -83,7 +83,7 @@ export default function Home() {
               単なる在庫一覧ではなく、素材の種類、色柄、産地、年代、数量、価格帯、状態、背景ストーリー、活用可能性まで整理します。素材を探す人が「何に使えるか」まで想像できる状態にすることが、このサイトの役割です。
             </p>
             <p>
-              購入、サンプル確認、ロット相談、商品開発、老舗との共創企画については、結が間に入り、素材提供元と利用企業・デザイナーをつなぎます。
+              購入、サンプル確認、ロット相談、商品開発、老舗との共創企画については、遙が間に入り、素材提供元と利用企業・デザイナーをつなぎます。
             </p>
           </div>
         </div>
