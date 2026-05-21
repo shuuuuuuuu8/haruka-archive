@@ -571,7 +571,39 @@ export const MATERIALS: Material[] = [
     estimatedFields: ['story', 'pattern', 'color'],
     createdAt: '2026-05-18T00:00:00Z',
     updatedAt: '2026-05-18T00:00:00Z',
-  },]
+  },
+  {
+    id: 'HMB-027',
+    name: '正絹100% 成人式用帯 01',
+    nameEn: 'Pure Silk Obi for Coming-of-Age Ceremony 01',
+    category: '帯地',
+    materialType: '正絹100%',
+    color: '多色',
+    pattern: '伝統文様',
+    origin: '日本',
+    era: '不明',
+    supplier: '丸屋',
+    quantity: 1,
+    quantityUnit: '点',
+    quantitySize: 'single',
+    priceRange: 'consult',
+    status: 'checking',
+    recommendedUses: ['アート', 'アクセサリー'],
+    story:
+      '赤と金を基調に、梅や亀甲、波文様が重なる正絹100%の成人式用帯。華やかな意匠を活かした一点物素材です。',
+    characteristics:
+      '成人式用の帯として仕立てられた正絹素材。金糸の光沢と祝い柄の存在感があり、和装用途に加え、意匠を活かした企画素材としても相談できます。',
+    images: ['/materials/HMB-027/main.jpg'],
+    tags: ['丸屋', '帯地', '正絹100%', '成人式用帯', '伝統文様'],
+    sampleAvailable: true,
+    isFeatured: true,
+    verifiedFields: ['category', 'materialType', 'supplier'],
+    pendingFields: ['origin', 'era', 'quantity'],
+    estimatedFields: ['story', 'pattern', 'color'],
+    createdAt: '2026-05-21T00:00:00Z',
+    updatedAt: '2026-05-21T00:00:00Z',
+  },
+]
 
 export const PARTNERS: Partner[] = [
   {
