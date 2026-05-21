@@ -52,7 +52,7 @@ export default function MaterialCard({ material }: { material: Material }) {
             <h3 className="mt-1 font-serif text-lg font-medium leading-snug">{material.name}</h3>
           </div>
           <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-            {material.materialType} / 訪問着用帯
+            {material.materialType} / {material.category}
           </p>
           <p className="text-xs leading-6" style={{ color: 'var(--text-muted)' }}>
             {shortDescription}
