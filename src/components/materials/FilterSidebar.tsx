@@ -1,14 +1,12 @@
 'use client'
 
 import { X } from 'lucide-react'
-import type { ColorGroup, Era, MaterialCategory, MaterialFilters, PriceRange, QuantitySize } from '@/types/material'
+import type { ColorGroup, MaterialFilters, PriceRange, QuantitySize } from '@/types/material'
 import { PRICE_RANGE_LABELS, QUANTITY_SIZE_LABELS } from '@/types/material'
 
-const CATEGORIES: MaterialCategory[] = ['絹', '綿', '麻', '反物', '帯地', '和紙', '古布', '工芸素材', 'その他']
+const MATERIAL_TYPES = ['絹', 'ポリエステル']
 const COLORS: ColorGroup[] = ['白系', '黒系', '藍系', '赤系', '金系', '茶系', '緑系', '多色', 'その他']
-const ERAS: Era[] = ['明治', '大正', '昭和', '平成', '現代', '不明']
-const ORIGINS = ['京都', '徳島', '茨城', '福井', '石川']
-const PRICE_RANGES: PriceRange[] = ['consult', 'low', 'mid', 'high', 'premium']
+const PRICE_RANGES: PriceRange[] = ['consult']
 const QUANTITY_SIZES: QuantitySize[] = ['sample', 'single', 'small', 'medium', 'large']
 
 function toggle<T>(arr: T[] | undefined, val: T): T[] {
@@ -67,18 +65,8 @@ function SidebarContent({ filters, onChange }: Pick<Props, 'filters' | 'onChange
         )}
       </div>
       <Section title="素材の種類">
-        {CATEGORIES.map((category) => (
-          <CheckItem key={category} label={category} active={!!filters.category?.includes(category)} onToggle={() => onChange({ ...filters, category: toggle(filters.category, category) })} />
-        ))}
-      </Section>
-      <Section title="産地">
-        {ORIGINS.map((origin) => (
-          <CheckItem key={origin} label={origin} active={!!filters.origin?.includes(origin)} onToggle={() => onChange({ ...filters, origin: toggle(filters.origin, origin) })} />
-        ))}
-      </Section>
-      <Section title="年代">
-        {ERAS.map((era) => (
-          <CheckItem key={era} label={era} active={!!filters.era?.includes(era)} onToggle={() => onChange({ ...filters, era: toggle(filters.era, era) })} />
+        {MATERIAL_TYPES.map((materialType) => (
+          <CheckItem key={materialType} label={materialType} active={!!filters.materialType?.includes(materialType)} onToggle={() => onChange({ ...filters, materialType: toggle(filters.materialType, materialType) })} />
         ))}
       </Section>
       <Section title="色">

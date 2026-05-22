@@ -2,8 +2,8 @@ export type MaterialCategory =
   | '絹'
   | '綿'
   | '麻'
-  | '反物'
-  | '帯地'
+  | '薄手シルク'
+  | '厚手シルク'
   | '和紙'
   | '古布'
   | '工芸素材'
@@ -72,6 +72,7 @@ export interface Partner {
 
 export interface MaterialFilters {
   category?: MaterialCategory[]
+  materialType?: string[]
   color?: ColorGroup[]
   pattern?: PatternType[]
   origin?: string[]

@@ -36,6 +36,11 @@ export default function MaterialsPage() {
     let data = query.trim() ? fuse.search(query).map((result) => result.item) : [...MATERIALS]
 
     if (filters.category?.length) data = data.filter((material) => filters.category!.includes(material.category))
+    if (filters.materialType?.length) {
+      data = data.filter((material) =>
+        filters.materialType!.some((type) => (type === '絹' ? material.materialType.includes('絹') : material.materialType === type)),
+      )
+    }
     if (filters.origin?.length) data = data.filter((material) => filters.origin!.includes(material.origin))
     if (filters.era?.length) data = data.filter((material) => filters.era!.includes(material.era))
     if (filters.color?.length) data = data.filter((material) => filters.color!.includes(material.color))

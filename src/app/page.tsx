@@ -5,9 +5,10 @@ import type { MaterialCategory } from '@/types/material'
 
 const TRUST_ITEMS = ['閲覧・検索は無料', '直接販売ではなく相談制', 'BtoBの商品開発向け', '遙が提供元と利用企業を仲介']
 const USE_CASES = ['アパレル・バッグの商品開発', 'ホテル・店舗向けインテリア', '海外向けの限定企画', '老舗との共創プロジェクト']
-const CATEGORY_ORDER: MaterialCategory[] = ['帯地', '絹', '綿', '麻', '反物', '和紙', '古布', '工芸素材', 'その他']
+const CATEGORY_ORDER: MaterialCategory[] = ['厚手シルク', '薄手シルク', '絹', '綿', '麻', '和紙', '古布', '工芸素材', 'その他']
 const CATEGORY_LABELS: Partial<Record<MaterialCategory, string>> = {
-  帯地: '帯',
+  厚手シルク: '厚手シルク',
+  薄手シルク: '薄手シルク',
 }
 
 export default function Home() {
@@ -30,7 +31,7 @@ export default function Home() {
               次のものづくりへ。
             </h1>
             <p className="mt-7 max-w-2xl text-sm leading-8 text-white/82">
-              絹、綿、麻、反物、帯地、和紙、古布、工芸素材。結 素材バンクは、日本の老舗や職人工房に保管されてきた価値ある素材在庫を、企業・ブランド・デザイナーの新しい商品開発へつなぐBtoB向け素材プラットフォームです。
+              絹、綿、麻、厚手シルク、薄手シルク、和紙、古布、工芸素材。結 素材バンクは、日本の老舗や職人工房に保管されてきた価値ある素材在庫を、企業・ブランド・デザイナーの新しい商品開発へつなぐBtoB向け素材プラットフォームです。
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/materials" className="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm tracking-[0.16em] text-white" style={{ backgroundColor: 'var(--accent)' }}>
