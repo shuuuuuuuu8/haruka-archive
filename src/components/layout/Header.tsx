@@ -9,6 +9,7 @@ const NAV = [
   { href: '/materials', label: '素材を探す' },
   { href: '/partners', label: '提供元' },
   { href: '/inquiry', label: '相談する' },
+  { href: '/about', label: '素材バンク' },
 ]
 
 export default function Header() {
