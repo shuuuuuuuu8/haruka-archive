@@ -3,8 +3,8 @@ import { ArrowRight, CheckCircle, ExternalLink, MessageSquare, Search, Sparkles 
 import { MATERIALS, PARTNERS } from '@/lib/data'
 import type { MaterialCategory } from '@/types/material'
 
-const TRUST_ITEMS = ['閲覧・検索は無料', '直接販売ではなく相談制', 'BtoBの商品開発向け', '遙が提供元と利用企業を仲介']
-const USE_CASES = ['アパレル・バッグの商品開発', 'ホテル・店舗向けインテリア', '海外向けの限定企画', '老舗との共創プロジェクト']
+const TRUST_ITEMS = ['閲覧無料', '企業・個人デザイナー向け', '老舗の未活用素材', '直接購入ではなく相談制']
+const USE_CASES = ['アパレル・バッグの商品開発', 'ホテル・店舗向けインテリア', '個人デザイナーの作品制作', '老舗との共創プロジェクト']
 const CATEGORY_ORDER: MaterialCategory[] = ['厚手シルク', '薄手シルク', '絹', '綿', '麻', '和紙', '古布', '工芸素材', 'その他']
 const CATEGORY_LABELS: Partial<Record<MaterialCategory, string>> = {
   厚手シルク: '厚手シルク',
@@ -26,12 +26,15 @@ export default function Home() {
           <div className="max-w-3xl pt-16 text-white">
             <p className="mb-5 text-xs tracking-[0.28em] text-white/75">MUSUBI MATERIAL BANK</p>
             <h1 className="text-4xl font-medium leading-tight sm:text-5xl lg:text-6xl">
-              老舗に眠る素材を、
+              日本に眠る素材を、
               <br />
-              次のものづくりへ。
+              次のつくり手へ。
             </h1>
             <p className="mt-7 max-w-2xl text-sm leading-8 text-white/82">
-              絹、綿、麻、厚手シルク、薄手シルク、和紙、古布、工芸素材。結 素材バンクは、日本の老舗や職人工房に保管されてきた価値ある素材在庫を、企業・ブランド・デザイナーの新しい商品開発へつなぐBtoB向け素材プラットフォームです。
+              老舗や職人工房に眠る未活用素材・デッドストック素材をデータ化し、企業や個人デザイナーが必要な素材をすぐに見つけられる素材バンクです。
+            </p>
+            <p className="mt-4 max-w-2xl text-xs leading-7 text-white/72">
+              素材を持つ老舗と、素材を探す企業・個人デザイナーを、遙が間に入ってつなぎます。
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/materials" className="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm tracking-[0.16em] text-white" style={{ backgroundColor: 'var(--accent)' }}>
@@ -40,7 +43,7 @@ export default function Home() {
               </Link>
               <Link href="/inquiry" className="inline-flex items-center justify-center gap-2 border border-white/45 px-6 py-3 text-sm tracking-[0.16em] text-white">
                 <MessageSquare size={16} />
-                相談する
+                素材について相談する
               </Link>
             </div>
           </div>
@@ -81,10 +84,16 @@ export default function Home() {
           </div>
           <div className="space-y-5 text-sm leading-8" style={{ color: 'var(--text-muted)' }}>
             <p>
-              単なる在庫一覧ではなく、素材の種類、色柄、産地、年代、数量、価格帯、状態、背景ストーリー、活用可能性まで整理します。素材を探す人が「何に使えるか」まで想像できる状態にすることが、このサイトの役割です。
+              遙 素材バンクは、日本各地の老舗や職人工房に眠る未活用素材・デッドストック素材をデータ化し、企業や個人デザイナーが目的に合った素材を探せる素材検索プラットフォームです。
             </p>
             <p>
-              購入、サンプル確認、ロット相談、商品開発、老舗との共創企画については、遙が間に入り、素材提供元と利用企業・デザイナーをつなぎます。
+              これまで外部から見えにくかった反物・帯地・古布・和紙・工芸素材などを、種類・色柄・数量・産地・年代・背景ストーリーごとに整理して掲載します。
+            </p>
+            <p>
+              気になる素材については、遙が間に入り、素材を保有する老舗と、素材を必要とする企業・ブランド・個人デザイナーをつなぎます。
+            </p>
+            <p>
+              このサイトは、直接購入できるECサイトではありません。素材を検索・閲覧し、サンプル確認・ロット相談・価格相談・商品開発・共創企画について遙へ相談するための入口です。
             </p>
           </div>
         </div>
