@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, FlaskConical } from 'lucide-react'
+import { ArrowRight, FlaskConical, MessageSquare } from 'lucide-react'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import type { Material } from '@/types/material'
 
@@ -30,6 +30,9 @@ export default function MaterialCard({ material }: { material: Material }) {
               </span>
               <span className="border border-white/70 bg-white/92 px-2 py-0.5 text-[10px]" style={{ color: 'var(--text)' }}>
                 {material.category}
+              </span>
+              <span className="border border-white/70 bg-white/92 px-2 py-0.5 text-[10px]" style={{ color: 'var(--accent)' }}>
+                相談制
               </span>
             </div>
           </div>
@@ -59,9 +62,15 @@ export default function MaterialCard({ material }: { material: Material }) {
           <p className="text-xs leading-6" style={{ color: 'var(--text-muted)' }}>
             {shortDescription}
           </p>
-          <span className="mt-auto inline-flex items-center justify-end gap-1 text-[11px] tracking-[0.14em]" style={{ color: 'var(--accent)' }}>
-            詳細を見る <ArrowRight size={12} />
-          </span>
+          <div className="mt-auto flex items-center justify-between gap-3 border-t pt-3" style={{ borderColor: 'var(--border)' }}>
+            <span className="inline-flex items-center gap-1 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+              <MessageSquare size={12} />
+              サンプル・ロット相談
+            </span>
+            <span className="inline-flex items-center gap-1 text-[11px] tracking-[0.14em]" style={{ color: 'var(--accent)' }}>
+              詳細 <ArrowRight size={12} />
+            </span>
+          </div>
         </div>
       </article>
     </Link>

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Fuse from 'fuse.js'
-import { LayoutGrid, List, Search, SlidersHorizontal, X } from 'lucide-react'
+import { ClipboardCheck, LayoutGrid, List, MessageSquare, Search, SlidersHorizontal, X } from 'lucide-react'
 import FilterSidebar from '@/components/materials/FilterSidebar'
 import MaterialCard from '@/components/materials/MaterialCard'
 import { MATERIALS } from '@/lib/data'
@@ -11,6 +11,7 @@ import type { ColorGroup, Material, MaterialCategory, MaterialFilters } from '@/
 const QUICK_CATEGORIES: MaterialCategory[] = ['厚手シルク', '薄手シルク']
 const QUICK_MATERIAL_TYPES = ['絹', 'ポリエステル']
 const QUICK_COLORS: ColorGroup[] = ['白系', '黒系', '藍系', '赤系', '金系', '緑系', '多色']
+const SEARCH_FLOW = ['素材を探す', '候補を比較する', 'サンプル・ロットを相談する']
 
 function toggle<T>(arr: T[] | undefined, val: T): T[] {
   const current = arr ?? []
@@ -89,7 +90,7 @@ export default function MaterialsPage() {
               </p>
               <h1 className="text-3xl font-medium">素材を探す</h1>
               <p className="mt-4 max-w-2xl text-sm leading-7" style={{ color: 'var(--text-muted)' }}>
-                名前、用途、色、素材感から検索できます。気になる素材は詳細ページから相談できます。
+                未活用素材・デッドストック素材を、種類・色・用途・背景から探せます。購入ボタンは置かず、気になる素材を遙へ相談するための素材バンクです。
               </p>
             </div>
             <div className="relative">
@@ -124,6 +125,23 @@ export default function MaterialsPage() {
                 すべてクリア
               </button>
             )}
+          </div>
+
+          <div className="mt-5 grid gap-3 border p-4 md:grid-cols-[1fr_auto]" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg)' }}>
+            <div className="flex flex-wrap items-center gap-3 text-xs" style={{ color: 'var(--text-muted)' }}>
+              {SEARCH_FLOW.map((item, index) => (
+                <span key={item} className="inline-flex items-center gap-2">
+                  <span className="inline-flex h-5 w-5 items-center justify-center border text-[10px]" style={{ borderColor: 'var(--border)', color: 'var(--accent)' }}>
+                    {index + 1}
+                  </span>
+                  {item}
+                </span>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--accent)' }}>
+              <ClipboardCheck size={14} />
+              ECではなく、相談・マッチングの入口
+            </div>
           </div>
         </div>
       </section>
@@ -186,19 +204,29 @@ export default function MaterialsPage() {
 
 function ListItem({ material }: { material: Material }) {
   return (
-    <a href={`/materials/${material.id}`} className="grid gap-4 py-5 sm:grid-cols-[120px_1fr]">
-      <div className="h-24 bg-cover bg-center" style={{ backgroundImage: `url(${material.images[0]})` }} />
-      <div>
+    <a href={`/materials/${material.id}`} className="grid gap-4 py-5 sm:grid-cols-[120px_1fr_auto]">
+      <div className="h-28 bg-cover bg-center" style={{ backgroundImage: `url(${material.images[0]})` }} />
+      <div className="min-w-0">
         <p className="text-[10px] tracking-[0.18em]" style={{ color: 'var(--text-muted)' }}>
           {material.id} / {material.category}
         </p>
         <p className="mt-1 font-serif text-xl">{material.name}</p>
-        <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-          {material.origin} / {material.era} / {material.supplier}
-        </p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {[material.materialType, material.color, material.pattern, `${material.quantity}${material.quantityUnit}`, material.sampleAvailable ? 'サンプル相談可' : '要確認'].map((item) => (
+            <span key={item} className="border px-2 py-1 text-[11px]" style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
+              {item}
+            </span>
+          ))}
+        </div>
         <p className="mt-2 line-clamp-2 text-xs leading-6" style={{ color: 'var(--text-muted)' }}>
           {material.story}
         </p>
+      </div>
+      <div className="flex items-end justify-start sm:justify-end">
+        <span className="inline-flex items-center gap-1 text-xs" style={{ color: 'var(--accent)' }}>
+          <MessageSquare size={14} />
+          相談へ
+        </span>
       </div>
     </a>
   )

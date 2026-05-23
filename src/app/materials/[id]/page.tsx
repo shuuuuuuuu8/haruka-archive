@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, MessageSquare } from 'lucide-react'
-import { PriceBadge, StatusBadge, VerifiedBadge } from '@/components/ui/StatusBadge'
+import { StatusBadge, VerifiedBadge } from '@/components/ui/StatusBadge'
 import { MATERIALS } from '@/lib/data'
 import { QUANTITY_SIZE_LABELS } from '@/types/material'
 
@@ -50,9 +50,11 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
 
             <div className="mt-5 flex flex-wrap gap-2">
               <StatusBadge status={material.status} />
-              <PriceBadge priceRange={material.priceRange} />
               <span className="border border-stone-200 px-2 py-0.5 text-[10px] text-stone-600">
                 {QUANTITY_SIZE_LABELS[material.quantitySize]}
+              </span>
+              <span className="border border-stone-200 px-2 py-0.5 text-[10px] text-stone-600">
+                直接購入ではなく相談制
               </span>
             </div>
 
@@ -63,7 +65,7 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
                 ['柄', material.pattern],
                 ['数量', `${material.quantity}${material.quantityUnit}`],
                 ['サンプル', material.sampleAvailable ? '相談可' : '要確認'],
-                ['価格帯', '個別相談'],
+                ['相談項目', 'サンプル確認・ロット相談・価格相談'],
               ].map(([label, value]) => (
                 <div key={label} className="border p-3" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
                   <dt className="text-[10px] tracking-[0.18em]" style={{ color: 'var(--text-muted)' }}>
@@ -108,10 +110,19 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
               ))}
             </div>
 
-            <Link href="/inquiry" className="mt-8 inline-flex items-center justify-center gap-2 px-6 py-3 text-sm tracking-[0.14em] text-white" style={{ backgroundColor: 'var(--accent)' }}>
-              <MessageSquare size={16} />
-              この素材について相談する
-            </Link>
+            <div className="mt-8 border p-5" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
+              <p className="text-[10px] tracking-[0.2em]" style={{ color: 'var(--text-muted)' }}>
+                NEXT STEP
+              </p>
+              <h2 className="mt-2 font-serif text-xl">この素材を候補に入れて相談する</h2>
+              <p className="mt-3 text-sm leading-7" style={{ color: 'var(--text-muted)' }}>
+                このサイトでは直接購入できません。用途、希望数量、サンプル確認、価格相談、商品開発の内容を遙へ共有してください。遙が素材を保有する老舗・工房との間に入り、確認と調整を進めます。
+              </p>
+              <Link href="/inquiry" className="mt-5 inline-flex items-center justify-center gap-2 px-6 py-3 text-sm tracking-[0.14em] text-white" style={{ backgroundColor: 'var(--accent)' }}>
+                <MessageSquare size={16} />
+                サンプル・ロットについて相談する
+              </Link>
+            </div>
           </section>
         </div>
       </div>
