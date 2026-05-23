@@ -2,17 +2,44 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Fuse from 'fuse.js'
-import { LayoutGrid, List, Search, SlidersHorizontal } from 'lucide-react'
+import { LayoutGrid, List, Search, SlidersHorizontal, X } from 'lucide-react'
 import FilterSidebar from '@/components/materials/FilterSidebar'
 import MaterialCard from '@/components/materials/MaterialCard'
 import { MATERIALS } from '@/lib/data'
-import type { Material, MaterialCategory, MaterialFilters } from '@/types/material'
+import type { ColorGroup, Material, MaterialCategory, MaterialFilters } from '@/types/material'
+
+const QUICK_CATEGORIES: MaterialCategory[] = ['厚手シルク', '薄手シルク']
+const QUICK_MATERIAL_TYPES = ['絹', 'ポリエステル']
+const QUICK_COLORS: ColorGroup[] = ['白系', '黒系', '藍系', '赤系', '金系', '緑系', '多色']
+
+function toggle<T>(arr: T[] | undefined, val: T): T[] {
+  const current = arr ?? []
+  return current.includes(val) ? current.filter((item) => item !== val) : [...current, val]
+}
+
+function QuickChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="border px-3 py-1.5 text-xs transition-colors"
+      style={{
+        borderColor: active ? 'var(--accent)' : 'var(--border)',
+        backgroundColor: active ? 'var(--accent-pale)' : 'var(--bg-card)',
+        color: active ? 'var(--accent)' : 'var(--text-muted)',
+      }}
+    >
+      {label}
+    </button>
+  )
+}
 
 export default function MaterialsPage() {
   const [query, setQuery] = useState('')
   const [filters, setFilters] = useState<MaterialFilters>({})
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+  const hasFilters = Object.values(filters).some((value) => value !== undefined && (!Array.isArray(value) || value.length > 0))
 
   useEffect(() => {
     const category = new URLSearchParams(window.location.search).get('category')
@@ -53,24 +80,50 @@ export default function MaterialsPage() {
 
   return (
     <main style={{ backgroundColor: 'var(--bg)' }}>
-      <section className="border-b px-4 pb-8 pt-24 sm:px-6" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
+      <section className="border-b px-4 pb-6 pt-24 sm:px-6" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
         <div className="mx-auto max-w-7xl">
-          <p className="mb-2 text-xs tracking-[0.24em]" style={{ color: 'var(--accent)' }}>
-            MATERIAL ARCHIVE
-          </p>
-          <h1 className="text-3xl font-medium">素材を探す</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7" style={{ color: 'var(--text-muted)' }}>
-            素材名、産地、年代、用途、背景ストーリーから検索できます。掲載在庫は変動するため、気になる素材は早めにご相談ください。
-          </p>
-          <div className="relative mt-6 max-w-xl">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2" size={16} style={{ color: 'var(--text-muted)' }} />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="例: 藍染、バッグ、京都、和紙..."
-              className="w-full border bg-white py-3 pl-10 pr-4 text-sm outline-none"
-              style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
-            />
+          <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+            <div>
+              <p className="mb-2 text-xs tracking-[0.24em]" style={{ color: 'var(--accent)' }}>
+                MATERIAL ARCHIVE
+              </p>
+              <h1 className="text-3xl font-medium">素材を探す</h1>
+              <p className="mt-4 max-w-2xl text-sm leading-7" style={{ color: 'var(--text-muted)' }}>
+                名前、用途、色、素材感から検索できます。気になる素材は詳細ページから相談できます。
+              </p>
+            </div>
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2" size={18} style={{ color: 'var(--text-muted)' }} />
+              {query && (
+                <button type="button" onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1" aria-label="検索をクリア" style={{ color: 'var(--text-muted)' }}>
+                  <X size={16} />
+                </button>
+              )}
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="例: 赤い振袖、白い反物、バッグ、ポリエステル"
+                className="w-full border bg-white py-4 pl-12 pr-10 text-base outline-none"
+                style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+              />
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            {QUICK_CATEGORIES.map((category) => (
+              <QuickChip key={category} label={category} active={!!filters.category?.includes(category)} onClick={() => setFilters((current) => ({ ...current, category: toggle(current.category, category) }))} />
+            ))}
+            {QUICK_MATERIAL_TYPES.map((materialType) => (
+              <QuickChip key={materialType} label={materialType} active={!!filters.materialType?.includes(materialType)} onClick={() => setFilters((current) => ({ ...current, materialType: toggle(current.materialType, materialType) }))} />
+            ))}
+            {QUICK_COLORS.map((color) => (
+              <QuickChip key={color} label={color} active={!!filters.color?.includes(color)} onClick={() => setFilters((current) => ({ ...current, color: toggle(current.color, color) }))} />
+            ))}
+            {(query || hasFilters) && (
+              <button type="button" onClick={() => { setQuery(''); setFilters({}) }} className="border px-3 py-1.5 text-xs" style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
+                すべてクリア
+              </button>
+            )}
           </div>
         </div>
       </section>
@@ -88,7 +141,7 @@ export default function MaterialsPage() {
               絞り込み
             </button>
             <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              {results.length}件
+              {results.length}件を表示 / 全{MATERIALS.length}件
             </span>
           </div>
           <div className="flex border" style={{ borderColor: 'var(--border)' }}>
