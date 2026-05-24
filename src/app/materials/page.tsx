@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Fuse from 'fuse.js'
-import { ClipboardCheck, LayoutGrid, List, MessageSquare, Search, SlidersHorizontal, X } from 'lucide-react'
+import { ChevronDown, ClipboardCheck, LayoutGrid, List, MessageSquare, Search, SlidersHorizontal, X } from 'lucide-react'
 import FilterSidebar from '@/components/materials/FilterSidebar'
 import MaterialCard from '@/components/materials/MaterialCard'
 import { MATERIALS } from '@/lib/data'
@@ -39,6 +39,7 @@ export default function MaterialsPage() {
   const [query, setQuery] = useState('')
   const [filters, setFilters] = useState<MaterialFilters>({})
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [sortMode, setSortMode] = useState<'newest' | 'id' | 'category'>('newest')
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
   const hasFilters = Object.values(filters).some((value) => value !== undefined && (!Array.isArray(value) || value.length > 0))
 
@@ -76,20 +77,24 @@ export default function MaterialsPage() {
     if (filters.priceRange?.length) data = data.filter((material) => filters.priceRange!.includes(material.priceRange))
     if (filters.sampleAvailable) data = data.filter((material) => material.sampleAvailable)
 
-    return data
-  }, [filters, fuse, query])
+    return [...data].sort((a, b) => {
+      if (sortMode === 'id') return a.id.localeCompare(b.id)
+      if (sortMode === 'category') return a.category.localeCompare(b.category) || a.id.localeCompare(b.id)
+      return b.id.localeCompare(a.id)
+    })
+  }, [filters, fuse, query, sortMode])
 
   return (
-    <main style={{ backgroundColor: 'var(--bg)' }}>
-      <section className="border-b px-4 pb-6 pt-24 sm:px-6" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
+    <main style={{ backgroundColor: '#fbfaf7' }}>
+      <section className="border-b px-4 pb-6 pt-24 sm:px-6" style={{ borderColor: 'var(--border)', backgroundColor: '#fffefa' }}>
         <div className="mx-auto max-w-7xl">
-          <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+          <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
             <div>
               <p className="mb-2 text-xs tracking-[0.24em]" style={{ color: 'var(--accent)' }}>
                 MATERIAL ARCHIVE
               </p>
-              <h1 className="text-3xl font-medium">素材を探す</h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7" style={{ color: 'var(--text-muted)' }}>
+              <h1 className="text-2xl font-medium sm:text-3xl">未活用素材を探す</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-7" style={{ color: 'var(--text-muted)' }}>
                 未活用素材・デッドストック素材を、種類・色・用途・背景から探せます。購入ボタンは置かず、気になる素材を遙へ相談するための素材バンクです。
               </p>
             </div>
@@ -147,34 +152,51 @@ export default function MaterialsPage() {
       </section>
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setMobileFilterOpen(true)}
-              className="flex items-center gap-2 border px-3 py-2 text-xs lg:hidden"
-              style={{ borderColor: 'var(--border)' }}
-            >
-              <SlidersHorizontal size={14} />
-              絞り込み
-            </button>
-            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              {results.length}件を表示 / 全{MATERIALS.length}件
-            </span>
-          </div>
-          <div className="flex border" style={{ borderColor: 'var(--border)' }}>
-            <button type="button" onClick={() => setViewMode('grid')} className="p-2" style={{ backgroundColor: viewMode === 'grid' ? 'var(--accent-pale)' : 'transparent' }} aria-label="グリッド表示">
-              <LayoutGrid size={15} />
-            </button>
-            <button type="button" onClick={() => setViewMode('list')} className="p-2" style={{ backgroundColor: viewMode === 'list' ? 'var(--accent-pale)' : 'transparent' }} aria-label="リスト表示">
-              <List size={15} />
-            </button>
-          </div>
-        </div>
-
-        <div className="flex gap-8">
+        <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
           <FilterSidebar filters={filters} onChange={setFilters} isMobileOpen={mobileFilterOpen} onMobileClose={() => setMobileFilterOpen(false)} />
-          <section className="min-w-0 flex-1">
+          <section className="min-w-0">
+            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setMobileFilterOpen(true)}
+                  className="flex items-center gap-2 border bg-white px-3 py-2 text-xs lg:hidden"
+                  style={{ borderColor: 'var(--border)' }}
+                >
+                  <SlidersHorizontal size={14} />
+                  絞り込み
+                </button>
+                <p className="text-sm" style={{ color: 'var(--text)' }}>
+                  <span className="font-semibold">All Materials</span>
+                  <span style={{ color: 'var(--text-muted)' }}> - {results.length} / {MATERIALS.length} items</span>
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <label className="relative inline-flex items-center">
+                  <select
+                    value={sortMode}
+                    onChange={(event) => setSortMode(event.target.value as typeof sortMode)}
+                    className="appearance-none border bg-white py-2 pl-3 pr-9 text-xs outline-none"
+                    style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+                    aria-label="並び替え"
+                  >
+                    <option value="newest">新しい順</option>
+                    <option value="id">ID順</option>
+                    <option value="category">カテゴリ順</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2" size={14} style={{ color: 'var(--text-muted)' }} />
+                </label>
+                <div className="flex border bg-white" style={{ borderColor: 'var(--border)' }}>
+                  <button type="button" onClick={() => setViewMode('grid')} className="p-2" style={{ backgroundColor: viewMode === 'grid' ? 'var(--accent-pale)' : 'transparent' }} aria-label="グリッド表示">
+                    <LayoutGrid size={15} />
+                  </button>
+                  <button type="button" onClick={() => setViewMode('list')} className="p-2" style={{ backgroundColor: viewMode === 'list' ? 'var(--accent-pale)' : 'transparent' }} aria-label="リスト表示">
+                    <List size={15} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {results.length === 0 ? (
               <div className="border py-20 text-center" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
                 <p className="font-serif text-xl">該当する素材が見つかりませんでした</p>
@@ -183,7 +205,7 @@ export default function MaterialsPage() {
                 </p>
               </div>
             ) : viewMode === 'list' ? (
-              <div className="divide-y border-y" style={{ borderColor: 'var(--border)' }}>
+              <div className="divide-y border-y bg-white" style={{ borderColor: 'var(--border)' }}>
                 {results.map((material) => (
                   <ListItem key={material.id} material={material} />
                 ))}
@@ -204,7 +226,7 @@ export default function MaterialsPage() {
 
 function ListItem({ material }: { material: Material }) {
   return (
-    <a href={`/materials/${material.id}`} className="grid gap-4 py-5 sm:grid-cols-[120px_1fr_auto]">
+    <a href={`/materials/${material.id}`} className="grid gap-4 px-4 py-5 sm:grid-cols-[120px_1fr_auto]">
       <div className="h-28 bg-cover bg-center" style={{ backgroundImage: `url(${material.images[0]})` }} />
       <div className="min-w-0">
         <p className="text-[10px] tracking-[0.18em]" style={{ color: 'var(--text-muted)' }}>

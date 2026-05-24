@@ -1,6 +1,6 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { ChevronDown, X } from 'lucide-react'
 import type { ColorGroup, MaterialFilters, PriceRange, QuantitySize } from '@/types/material'
 import { PRICE_RANGE_LABELS, QUANTITY_SIZE_LABELS } from '@/types/material'
 
@@ -16,7 +16,7 @@ function toggle<T>(arr: T[] | undefined, val: T): T[] {
 
 function CheckItem<T extends string>({ label, active, onToggle }: { label: T | string; active: boolean; onToggle: () => void }) {
   return (
-    <button type="button" onClick={onToggle} className="flex w-full items-center gap-2 py-1.5 text-left">
+    <button type="button" onClick={onToggle} className="flex w-full items-center gap-2 py-1 text-left">
       <span
         className="flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center border"
         style={{ borderColor: active ? 'var(--accent)' : 'var(--border)', backgroundColor: active ? 'var(--accent)' : 'transparent' }}
@@ -32,11 +32,16 @@ function CheckItem<T extends string>({ label, active, onToggle }: { label: T | s
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="border-b py-4" style={{ borderColor: 'var(--border)' }}>
-      <p className="mb-2 text-[10px] tracking-[0.2em]" style={{ color: 'var(--text-muted)' }}>
-        {title}
-      </p>
-      <div>{children}</div>
+    <section className="mb-3 border bg-white" style={{ borderColor: 'var(--border)' }}>
+      <div className="flex items-center justify-between px-3 py-3">
+        <p className="text-sm" style={{ color: 'var(--text)' }}>
+          {title}
+        </p>
+        <ChevronDown size={15} style={{ color: 'var(--text-muted)' }} />
+      </div>
+      <div className="border-t px-3 py-2" style={{ borderColor: 'var(--border)' }}>
+        {children}
+      </div>
     </section>
   )
 }
@@ -53,9 +58,9 @@ function SidebarContent({ filters, onChange }: Pick<Props, 'filters' | 'onChange
 
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-[11px] tracking-[0.22em]" style={{ color: 'var(--text-muted)' }}>
-          FILTER
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+          Filters
         </p>
         {hasFilters && (
           <button type="button" onClick={() => onChange({})} className="flex items-center gap-1 text-[11px]" style={{ color: 'var(--accent)' }}>
@@ -94,7 +99,7 @@ function SidebarContent({ filters, onChange }: Pick<Props, 'filters' | 'onChange
 export default function FilterSidebar({ filters, onChange, isMobileOpen, onMobileClose }: Props) {
   return (
     <>
-      <aside className="hidden w-52 flex-shrink-0 self-start lg:sticky lg:top-24 lg:block">
+      <aside className="hidden flex-shrink-0 self-start lg:sticky lg:top-24 lg:block">
         <SidebarContent filters={filters} onChange={onChange} />
       </aside>
       {isMobileOpen && (
