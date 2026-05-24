@@ -67,13 +67,9 @@ export default function PartnersPage() {
                     {partner.story}
                   </p>
                   {partnerMaterials.length > 0 && (
-                    <div className="mt-auto flex flex-wrap gap-2 pt-2">
-                      {partnerMaterials.map((material) => (
-                        <Link key={material.id} href={`/materials/${material.id}`} className="border px-2 py-1 text-[11px]" style={{ borderColor: 'var(--border)', color: 'var(--accent)' }}>
-                          {material.id}
-                        </Link>
-                      ))}
-                    </div>
+                    <p className="mt-auto border-t pt-4 text-xs" style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
+                      登録素材 {partnerMaterials.length}件
+                    </p>
                   )}
                   {partner.websiteUrl ? (
                     <a
