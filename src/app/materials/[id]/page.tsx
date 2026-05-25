@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -8,6 +9,50 @@ import { QUANTITY_SIZE_LABELS } from '@/types/material'
 
 export function generateStaticParams() {
   return MATERIALS.map((material) => ({ id: material.id }))
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const material = MATERIALS.find((item) => item.id === id)
+
+  if (!material) {
+    return {
+      title: '素材が見つかりません',
+      robots: {
+        index: false,
+        follow: false,
+      },
+    }
+  }
+
+  const title = `${material.name} | ${material.materialType}・${material.category}`
+  const description = `${material.name}は${material.materialType}の${material.category}素材です。色は${material.color}、柄は${material.pattern}。サンプル確認・ロット相談・商品開発について遙へ相談できます。`
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/materials/${material.id}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `/materials/${material.id}`,
+      type: 'article',
+      images: [
+        {
+          url: material.images[0],
+          alt: material.name,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [material.images[0]],
+    },
+  }
 }
 
 export default async function MaterialDetailPage({ params }: { params: Promise<{ id: string }> }) {

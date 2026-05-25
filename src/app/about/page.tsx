@@ -1,7 +1,17 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle, ExternalLink, MessageSquare, Search, Sparkles } from 'lucide-react'
 import { MATERIALS, PARTNERS } from '@/lib/data'
 import type { MaterialCategory } from '@/types/material'
+
+export const metadata: Metadata = {
+  title: '素材バンクについて',
+  description:
+    '遙 素材バンクは、日本各地の老舗や職人工房に眠る未活用素材・デッドストック素材をデータ化し、企業や個人デザイナーが目的に合った素材を探せる素材検索プラットフォームです。',
+  alternates: {
+    canonical: '/about',
+  },
+}
 
 const TRUST_ITEMS = ['閲覧無料', '企業・個人デザイナー向け', '老舗の未活用素材', '直接購入ではなく相談制']
 const USE_CASES = ['アパレル・バッグの商品開発', 'ホテル・店舗向けインテリア', '個人デザイナーの作品制作', '老舗との共創プロジェクト']

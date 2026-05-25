@@ -1,6 +1,16 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, ExternalLink, MapPin, Package } from 'lucide-react'
 import { MATERIALS, PARTNERS } from '@/lib/data'
+
+export const metadata: Metadata = {
+  title: '素材提供元',
+  description:
+    '遙 素材バンクに登録されている老舗・職人工房などの素材提供元一覧です。提供元の背景や保管素材をもとに、次のものづくりの接点をつくります。',
+  alternates: {
+    canonical: '/partners',
+  },
+}
 
 export default function PartnersPage() {
   return (
