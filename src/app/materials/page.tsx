@@ -108,7 +108,7 @@ export default function MaterialsPage() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="例: 赤い振袖、白い反物、バッグ、ポリエステル"
+                placeholder="例: 赤い帯、白い反物、バッグ、ポリエステル"
                 className="w-full border bg-white py-4 pl-12 pr-10 text-base outline-none"
                 style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
               />
