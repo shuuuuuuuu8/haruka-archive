@@ -86,7 +86,7 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
   return (
     <main style={{ backgroundColor: '#fbfaf7' }}>
       {/* 素材登録CTA */}
-      <div className="border-b px-4 py-4 sm:px-6" style={{ borderColor: 'var(--border)', backgroundColor: '#fffefa' }}>
+      <div className="border-b px-4 pb-4 pt-20 sm:px-6" style={{ borderColor: 'var(--border)', backgroundColor: '#fffefa' }}>
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
             <span className="mr-2 font-medium" style={{ color: 'var(--text)' }}>素材をお持ちの方へ</span>
@@ -104,7 +104,7 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
         </div>
       </div>
 
-      <section className="border-b px-4 pb-6 pt-24 sm:px-6" style={{ borderColor: 'var(--border)', backgroundColor: '#fffefa' }}>
+      <section className="border-b px-4 pb-6 pt-8 sm:px-6" style={{ borderColor: 'var(--border)', backgroundColor: '#fffefa' }}>
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
             <div>
