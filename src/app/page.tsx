@@ -5,6 +5,23 @@ import Link from 'next/link'
 
 const TITLE_CHARS = ['素', '材', 'バ', 'ン', 'ク']
 
+function Corner({ pos, color }: { pos: 'tl' | 'tr' | 'bl' | 'br'; color: string }) {
+  const style: React.CSSProperties = {
+    position: 'absolute',
+    width: '18px',
+    height: '18px',
+    borderColor: color,
+    borderStyle: 'solid',
+    borderWidth: 0,
+    transition: 'opacity 0.4s ease',
+  }
+  if (pos === 'tl') { style.top = 16; style.left = 16; style.borderTopWidth = 1; style.borderLeftWidth = 1 }
+  if (pos === 'tr') { style.top = 16; style.right = 16; style.borderTopWidth = 1; style.borderRightWidth = 1 }
+  if (pos === 'bl') { style.bottom = 16; style.left = 16; style.borderBottomWidth = 1; style.borderLeftWidth = 1 }
+  if (pos === 'br') { style.bottom = 16; style.right = 16; style.borderBottomWidth = 1; style.borderRightWidth = 1 }
+  return <div style={style} />
+}
+
 export default function Home() {
   const [phase, setPhase] = useState(0)
   const [hovered, setHovered] = useState<'register' | 'explore' | null>(null)
@@ -12,14 +29,16 @@ export default function Home() {
   const [smoothMouse, setSmoothMouse] = useState({ x: 0.5, y: 0.5 })
   const containerRef = useRef<HTMLDivElement>(null)
   const mouseRafRef = useRef<number>(0)
-  const particleRafRef = useRef<number>(0)
+  const canvasRafRef = useRef<number>(0)
   const mouseRef = useRef({ x: 0.5, y: 0.5 })
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const trailRef = useRef<Array<{ x: number; y: number; age: number }>>([])
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase(1), 200)
-    const t2 = setTimeout(() => setPhase(2), 650)
-    const t3 = setTimeout(() => setPhase(3), 1350)
+    const t1 = setTimeout(() => setPhase(1), 100)
+    const t2 = setTimeout(() => setPhase(2), 520)
+    const t3 = setTimeout(() => setPhase(3), 1120)
+    const t4 = setTimeout(() => setPhase(4), 1700)
 
     const animateMouse = () => {
       setSmoothMouse(prev => ({
@@ -37,33 +56,89 @@ export default function Home() {
       canvas.width = W
       canvas.height = H
       const ctx = canvas.getContext('2d')!
-      const pts = Array.from({ length: 80 }, () => ({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.22,
-        vy: (Math.random() - 0.5) * 0.22,
-        r: Math.random() * 1.1 + 0.3,
-        a: Math.random() * 0.22 + 0.04,
-      }))
+      const MAX_DIST = 125
+
+      const pts = Array.from({ length: 88 }, () => {
+        const x = Math.random() * W
+        const faction = x < W * 0.42 ? 'warm' : x > W * 0.58 ? 'cool' : 'neutral'
+        return {
+          x, y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.2,
+          vy: (Math.random() - 0.5) * 0.2,
+          r: Math.random() * 1.1 + 0.3,
+          a: Math.random() * 0.2 + 0.04,
+          faction,
+        }
+      })
+
       const draw = () => {
         ctx.clearRect(0, 0, W, H)
+
+        // Trail
+        trailRef.current = trailRef.current
+          .map(p => ({ ...p, age: p.age + 0.045 }))
+          .filter(p => p.age < 1)
+        for (const p of trailRef.current) {
+          ctx.beginPath()
+          ctx.arc(p.x, p.y, 1.6 * (1 - p.age * 0.6), 0, Math.PI * 2)
+          ctx.fillStyle = `rgba(255,255,255,${(1 - p.age) * 0.16})`
+          ctx.fill()
+        }
+
+        // Update particles
         for (const p of pts) {
           p.x = (p.x + p.vx + W) % W
           p.y = (p.y + p.vy + H) % H
+        }
+
+        // Constellation lines
+        ctx.lineWidth = 0.4
+        for (let i = 0; i < pts.length; i++) {
+          for (let j = i + 1; j < pts.length; j++) {
+            const dx = pts[i].x - pts[j].x
+            const dy = pts[i].y - pts[j].y
+            const dist = Math.sqrt(dx * dx + dy * dy)
+            if (dist < MAX_DIST) {
+              const a = (1 - dist / MAX_DIST) * 0.09
+              const xi = pts[i].x / W
+              const warmBias = xi < 0.4 ? 1 : xi > 0.6 ? 0 : (0.6 - xi) / 0.2
+              const r = Math.round(255 * (0.7 + warmBias * 0.3))
+              const b = Math.round(255 * (0.7 + (1 - warmBias) * 0.3))
+              ctx.beginPath()
+              ctx.moveTo(pts[i].x, pts[i].y)
+              ctx.lineTo(pts[j].x, pts[j].y)
+              ctx.strokeStyle = `rgba(${r},220,${b},${a})`
+              ctx.stroke()
+            }
+          }
+        }
+
+        // Particles
+        for (const p of pts) {
           ctx.beginPath()
           ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(255,255,255,${p.a})`
+          const t = p.x / W
+          const warm = Math.max(0, 1 - t * 2.5)
+          const cool = Math.max(0, t * 2.5 - 1.5)
+          if (warm > 0.15) {
+            ctx.fillStyle = `rgba(240,160,110,${p.a * (0.4 + warm * 0.6)})`
+          } else if (cool > 0.15) {
+            ctx.fillStyle = `rgba(155,145,255,${p.a * (0.4 + cool * 0.6)})`
+          } else {
+            ctx.fillStyle = `rgba(255,255,255,${p.a})`
+          }
           ctx.fill()
         }
-        particleRafRef.current = requestAnimationFrame(draw)
+
+        canvasRafRef.current = requestAnimationFrame(draw)
       }
-      particleRafRef.current = requestAnimationFrame(draw)
+      canvasRafRef.current = requestAnimationFrame(draw)
     }
 
     return () => {
-      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3)
+      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4)
       cancelAnimationFrame(mouseRafRef.current)
-      cancelAnimationFrame(particleRafRef.current)
+      cancelAnimationFrame(canvasRafRef.current)
     }
   }, [])
 
@@ -74,36 +149,42 @@ export default function Home() {
     const y = (e.clientY - rect.top) / rect.height
     mouseRef.current = { x, y }
     setMouse({ x, y })
+    trailRef.current.push({ x: e.clientX, y: e.clientY, age: 0 })
+    if (trailRef.current.length > 32) trailRef.current.shift()
   }
 
-  const tiltX = (smoothMouse.y - 0.5) * -4
-  const tiltY = (smoothMouse.x - 0.5) * 4
-  const pX = (smoothMouse.x - 0.5) * 20
-  const pY = (smoothMouse.y - 0.5) * 20
+  const tiltX = (smoothMouse.y - 0.5) * -3.5
+  const tiltY = (smoothMouse.x - 0.5) * 3.5
+  const pX = (smoothMouse.x - 0.5) * 18
+  const pY = (smoothMouse.y - 0.5) * 18
+
+  const seamLeft = hovered === 'register' ? '64%' : hovered === 'explore' ? '36%' : '50%'
+  const warmColor = 'rgba(215,105,60,0.8)'
+  const coolColor = 'rgba(165,155,230,0.8)'
 
   return (
     <>
       <style>{`
         @keyframes grain {
-          0%,100%{transform:translate(0,0)} 10%{transform:translate(-2%,-3%)} 20%{transform:translate(3%,2%)}
-          30%{transform:translate(-1%,4%)} 40%{transform:translate(4%,-1%)} 50%{transform:translate(-3%,3%)}
-          60%{transform:translate(2%,-4%)} 70%{transform:translate(-4%,1%)} 80%{transform:translate(1%,-2%)}
+          0%,100%{transform:translate(0,0)}10%{transform:translate(-2%,-3%)}20%{transform:translate(3%,2%)}
+          30%{transform:translate(-1%,4%)}40%{transform:translate(4%,-1%)}50%{transform:translate(-3%,3%)}
+          60%{transform:translate(2%,-4%)}70%{transform:translate(-4%,1%)}80%{transform:translate(1%,-2%)}
           90%{transform:translate(-2%,4%)}
         }
-        @keyframes pulse-ring {
-          0%  { transform:translate(-50%,-50%) scale(0.8); opacity:.55; }
-          100%{ transform:translate(-50%,-50%) scale(3.2); opacity:0; }
+        @keyframes seam-glow {
+          0%,100%{opacity:.1} 50%{opacity:.28}
         }
         @keyframes scanline {
           0%{transform:translateY(-100%)} 100%{transform:translateY(100vh)}
         }
-        @keyframes vline-in {
-          from{ transform:scaleY(0); opacity:0; }
-          to  { transform:scaleY(1); opacity:1; }
+        @keyframes vline-drop {
+          from{transform:scaleY(0);opacity:0} to{transform:scaleY(1);opacity:1}
         }
         @keyframes float-slow {
-          0%,100%{ transform:translateY(0px); }
-          50%    { transform:translateY(-18px); }
+          0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)}
+        }
+        @keyframes panel-overlay-in {
+          from{opacity:0} to{opacity:1}
         }
       `}</style>
 
@@ -113,12 +194,11 @@ export default function Home() {
         style={{ backgroundColor: '#060504', cursor: 'none' }}
         onMouseMove={handleMouseMove}
       >
-        {/* Particles */}
         <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 z-10" />
 
         {/* Noise */}
         <div
-          className="pointer-events-none absolute inset-[-20%] z-50 opacity-[0.03]"
+          className="pointer-events-none absolute inset-[-20%] z-50 opacity-[0.028]"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
             backgroundSize: '256px 256px',
@@ -128,177 +208,319 @@ export default function Home() {
 
         {/* Scanline */}
         <div
-          className="pointer-events-none absolute left-0 z-20 h-px w-full opacity-[0.04]"
+          className="pointer-events-none absolute left-0 h-px w-full opacity-[0.04]"
           style={{
+            zIndex: 22,
             background: 'linear-gradient(transparent,rgba(255,255,255,.85),transparent)',
-            animation: 'scanline 10s linear infinite',
+            animation: 'scanline 11s linear infinite',
+          }}
+        />
+
+        {/* Left atmosphere */}
+        <div
+          className="pointer-events-none absolute inset-y-0 left-0 z-[5]"
+          style={{
+            width: seamLeft,
+            background: 'radial-gradient(ellipse at 28% 50%, rgba(143,63,43,0.18) 0%, transparent 65%)',
+            transition: 'width 0.65s cubic-bezier(0.16,1,0.3,1)',
+          }}
+        />
+
+        {/* Right atmosphere */}
+        <div
+          className="pointer-events-none absolute inset-y-0 right-0 z-[5]"
+          style={{
+            width: hovered === 'explore' ? '64%' : hovered === 'register' ? '36%' : '50%',
+            background: 'radial-gradient(ellipse at 72% 50%, rgba(65,50,120,0.18) 0%, transparent 65%)',
+            transition: 'width 0.65s cubic-bezier(0.16,1,0.3,1)',
           }}
         />
 
         {/* Mouse spotlight */}
         <div
-          className="pointer-events-none absolute z-10"
+          className="pointer-events-none absolute z-[6]"
           style={{
             left: `${smoothMouse.x * 100}%`,
             top: `${smoothMouse.y * 100}%`,
             width: '900px', height: '900px',
             transform: 'translate(-50%,-50%)',
-            background: 'radial-gradient(circle, rgba(143,63,43,0.09) 0%, rgba(143,63,43,0.025) 45%, transparent 70%)',
+            background: hovered === 'register'
+              ? 'radial-gradient(circle, rgba(143,63,43,0.13) 0%, transparent 65%)'
+              : hovered === 'explore'
+                ? 'radial-gradient(circle, rgba(65,50,120,0.13) 0%, transparent 65%)'
+                : 'radial-gradient(circle, rgba(255,255,255,0.035) 0%, transparent 65%)',
           }}
         />
 
-        {/* BG orb warm */}
+        {/* Seam line */}
         <div
-          className="pointer-events-none absolute opacity-25"
+          className="pointer-events-none absolute inset-y-0 z-[8]"
           style={{
-            left: '8%', top: '25%',
-            width: '420px', height: '420px',
-            background: 'radial-gradient(circle, rgba(143,63,43,0.3) 0%, transparent 70%)',
-            animation: 'float-slow 9s ease-in-out infinite',
-            transform: `translate(${pX * 0.4}px,${pY * 0.4}px)`,
-            transition: 'transform 0.12s ease-out',
+            left: seamLeft,
+            width: '1px',
+            background: 'linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.1) 15%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.1) 85%, transparent 100%)',
+            animation: 'seam-glow 5s ease-in-out infinite',
+            transition: 'left 0.65s cubic-bezier(0.16,1,0.3,1)',
           }}
         />
 
-        {/* BG orb cool */}
-        <div
-          className="pointer-events-none absolute opacity-20"
-          style={{
-            right: '10%', bottom: '20%',
-            width: '340px', height: '340px',
-            background: 'radial-gradient(circle, rgba(70,55,120,0.35) 0%, transparent 70%)',
-            animation: 'float-slow 12s ease-in-out infinite reverse',
-            transform: `translate(${-pX * 0.3}px,${-pY * 0.3}px)`,
-            transition: 'transform 0.12s ease-out',
-          }}
-        />
-
-        {/* Decorative 結 */}
+        {/* Background 結 */}
         <div
           className="pointer-events-none absolute select-none font-serif"
           style={{
-            fontSize: 'clamp(180px, 30vw, 420px)',
+            fontSize: 'clamp(220px, 34vw, 500px)',
             fontWeight: 500,
-            color: 'rgba(255,255,255,0.012)',
+            color: 'rgba(255,255,255,0.010)',
             top: '50%', left: '50%',
-            transform: `translate(-50%,-50%) translate(${pX * 0.9}px,${pY * 0.9}px)`,
+            transform: `translate(-50%,-50%) translate(${pX * 0.85}px,${pY * 0.85}px)`,
             transition: 'transform 0.12s ease-out',
-            letterSpacing: '-0.02em',
             lineHeight: 1,
           }}
         >
           結
         </div>
 
-        {/* Vertical accent line left */}
+        {/* Left vertical accent line */}
         <div
-          className="absolute left-20 top-0 origin-top"
+          className="pointer-events-none absolute left-[72px] top-0 h-full w-px origin-top z-[4]"
           style={{
-            width: '1px', height: '100%',
-            backgroundColor: 'rgba(255,255,255,0.025)',
-            animation: phase >= 1 ? 'vline-in 1.4s cubic-bezier(0.16,1,0.3,1) 0.2s both' : 'none',
+            backgroundColor: 'rgba(255,255,255,0.022)',
+            animation: phase >= 1 ? 'vline-drop 1.4s cubic-bezier(0.16,1,0.3,1) 0.2s both' : 'none',
           }}
         />
-
-        {/* Vertical accent line right */}
+        {/* Right vertical accent line */}
         <div
-          className="absolute right-20 top-0 origin-top"
+          className="pointer-events-none absolute right-[72px] top-0 h-full w-px origin-top z-[4]"
           style={{
-            width: '1px', height: '100%',
-            backgroundColor: 'rgba(255,255,255,0.025)',
-            animation: phase >= 1 ? 'vline-in 1.4s cubic-bezier(0.16,1,0.3,1) 0.35s both' : 'none',
+            backgroundColor: 'rgba(255,255,255,0.022)',
+            animation: phase >= 1 ? 'vline-drop 1.4s cubic-bezier(0.16,1,0.3,1) 0.35s both' : 'none',
           }}
         />
-
-        {/* Vertical side text */}
-        <div
-          className="pointer-events-none absolute left-7 top-1/2 z-30 -translate-y-1/2"
-          style={{
-            writingMode: 'vertical-rl',
-            textOrientation: 'mixed',
-            opacity: phase >= 1 ? 1 : 0,
-            transition: 'opacity 1s ease 1s',
-          }}
-        >
-          <p className="text-[7px] tracking-[0.5em]" style={{ color: 'rgba(255,255,255,0.1)' }}>
-            未活用素材バンク
-          </p>
-        </div>
-        <div
-          className="pointer-events-none absolute right-7 top-1/2 z-30 -translate-y-1/2"
-          style={{
-            writingMode: 'vertical-rl',
-            textOrientation: 'mixed',
-            opacity: phase >= 1 ? 1 : 0,
-            transition: 'opacity 1s ease 1.1s',
-          }}
-        >
-          <p className="text-[7px] tracking-[0.5em]" style={{ color: 'rgba(255,255,255,0.1)' }}>
-            伝統工芸の素材を繋ぐ
-          </p>
-        </div>
 
         {/* Header */}
         <div
-          className="absolute left-24 top-8 z-30"
+          className="absolute left-24 top-7 z-40"
           style={{ opacity: phase >= 1 ? 1 : 0, transition: 'opacity 0.9s ease' }}
         >
-          <p className="font-serif text-xl font-medium text-white" style={{ letterSpacing: '0.18em' }}>結</p>
-          <p className="mt-0.5 text-[7px] tracking-[0.55em]" style={{ color: 'rgba(255,255,255,0.17)' }}>
+          <p className="font-serif text-xl font-medium text-white" style={{ letterSpacing: '0.2em' }}>結</p>
+          <p className="mt-0.5 text-[7px] tracking-[0.55em]" style={{ color: 'rgba(255,255,255,0.15)' }}>
             MUSUBI MATERIAL BANK
           </p>
         </div>
         <div
-          className="absolute right-24 top-8 z-30 text-right"
+          className="absolute right-24 top-7 z-40 text-right"
           style={{ opacity: phase >= 1 ? 1 : 0, transition: 'opacity 0.9s ease 0.1s' }}
         >
-          <p className="text-[7px] tracking-[0.45em]" style={{ color: 'rgba(255,255,255,0.11)' }}>
+          <p className="text-[7px] tracking-[0.45em]" style={{ color: 'rgba(255,255,255,0.1)' }}>
             KYOTO · ISHIKAWA · JAPAN
-          </p>
-          <p className="mt-1 text-[7px] tracking-[0.45em]" style={{ color: 'rgba(255,255,255,0.07)' }}>
-            EST. 2026
           </p>
         </div>
 
-        {/* Main content */}
+        {/* Vertical side text */}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center"
+          className="pointer-events-none absolute left-7 top-1/2 z-40 -translate-y-1/2"
+          style={{ writingMode: 'vertical-rl', opacity: phase >= 2 ? 1 : 0, transition: 'opacity 1.2s ease 1s' }}
+        >
+          <p className="text-[7px] tracking-[0.5em]" style={{ color: 'rgba(255,255,255,0.08)' }}>
+            未活用素材バンク
+          </p>
+        </div>
+        <div
+          className="pointer-events-none absolute right-7 top-1/2 z-40 -translate-y-1/2"
+          style={{ writingMode: 'vertical-rl', opacity: phase >= 2 ? 1 : 0, transition: 'opacity 1.2s ease 1.1s' }}
+        >
+          <p className="text-[7px] tracking-[0.5em]" style={{ color: 'rgba(255,255,255,0.08)' }}>
+            伝統工芸の素材を繋ぐ
+          </p>
+        </div>
+
+        {/* SPLIT PANELS */}
+        <div className="absolute inset-0 flex z-20">
+
+          {/* LEFT: Register */}
+          <a
+            href="https://musubi-sozai-gott.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative flex flex-col justify-end overflow-hidden"
+            style={{
+              cursor: 'none',
+              flex: hovered === 'register' ? '0 0 64%' : hovered === 'explore' ? '0 0 36%' : '1 1 0%',
+              transition: 'flex 0.65s cubic-bezier(0.16,1,0.3,1)',
+              minWidth: 0,
+              padding: 'clamp(20px, 4vw, 52px)',
+              paddingBottom: 'clamp(28px, 5vw, 60px)',
+            }}
+            onMouseEnter={() => setHovered('register')}
+            onMouseLeave={() => setHovered(null)}
+          >
+            {/* Corner brackets */}
+            {(['tl', 'tr', 'bl', 'br'] as const).map(pos => (
+              <Corner
+                key={pos}
+                pos={pos}
+                color={hovered === 'register' ? warmColor : 'rgba(255,255,255,0.1)'}
+              />
+            ))}
+
+            {/* Bottom-left content */}
+            <div
+              style={{
+                opacity: phase >= 3 ? 1 : 0,
+                transform: phase >= 3 ? 'translateY(0)' : 'translateY(28px)',
+                transition: 'all 1s cubic-bezier(0.16,1,0.3,1)',
+              }}
+            >
+              <p
+                className="mb-2 text-[7px] tracking-[0.58em]"
+                style={{ color: hovered === 'register' ? 'rgba(215,105,60,0.95)' : 'rgba(255,255,255,0.18)' }}
+              >
+                FOR SUPPLIERS
+              </p>
+              <p
+                className="font-serif font-medium text-white"
+                style={{ fontSize: 'clamp(18px, 2.8vw, 30px)', letterSpacing: '0.05em' }}
+              >
+                素材を登録する
+              </p>
+              <div
+                style={{
+                  maxHeight: hovered === 'register' ? '80px' : '0',
+                  overflow: 'hidden',
+                  transition: 'max-height 0.55s cubic-bezier(0.16,1,0.3,1)',
+                  marginTop: hovered === 'register' ? '10px' : '0',
+                }}
+              >
+                <p className="text-xs leading-6" style={{ color: 'rgba(255,255,255,0.28)' }}>
+                  眠っている着物・帯・反物を<br />次の作り手の手へ届けましょう
+                </p>
+              </div>
+              <div className="mt-5 flex items-center gap-3">
+                <div
+                  style={{
+                    height: '1px',
+                    width: hovered === 'register' ? '48px' : '14px',
+                    backgroundColor: hovered === 'register' ? 'rgba(215,105,60,0.7)' : 'rgba(255,255,255,0.1)',
+                    transition: 'all 0.55s cubic-bezier(0.16,1,0.3,1)',
+                  }}
+                />
+                <span className="text-[7px] tracking-[0.45em]" style={{ color: 'rgba(255,255,255,0.18)' }}>
+                  ENTER
+                </span>
+              </div>
+            </div>
+          </a>
+
+          {/* RIGHT: Explore */}
+          <Link
+            href="/materials"
+            className="relative flex flex-col justify-end overflow-hidden"
+            style={{
+              cursor: 'none',
+              flex: hovered === 'explore' ? '0 0 64%' : hovered === 'register' ? '0 0 36%' : '1 1 0%',
+              transition: 'flex 0.65s cubic-bezier(0.16,1,0.3,1)',
+              minWidth: 0,
+              padding: 'clamp(20px, 4vw, 52px)',
+              paddingBottom: 'clamp(28px, 5vw, 60px)',
+            }}
+            onMouseEnter={() => setHovered('explore')}
+            onMouseLeave={() => setHovered(null)}
+          >
+            {(['tl', 'tr', 'bl', 'br'] as const).map(pos => (
+              <Corner
+                key={pos}
+                pos={pos}
+                color={hovered === 'explore' ? coolColor : 'rgba(255,255,255,0.1)'}
+              />
+            ))}
+
+            {/* Bottom-right content */}
+            <div
+              className="flex flex-col items-end text-right"
+              style={{
+                opacity: phase >= 3 ? 1 : 0,
+                transform: phase >= 3 ? 'translateY(0)' : 'translateY(28px)',
+                transition: 'all 1s cubic-bezier(0.16,1,0.3,1) 0.12s',
+              }}
+            >
+              <p
+                className="mb-2 text-[7px] tracking-[0.58em]"
+                style={{ color: hovered === 'explore' ? 'rgba(165,155,230,0.95)' : 'rgba(255,255,255,0.18)' }}
+              >
+                FOR CREATORS
+              </p>
+              <p
+                className="font-serif font-medium text-white"
+                style={{ fontSize: 'clamp(18px, 2.8vw, 30px)', letterSpacing: '0.05em' }}
+              >
+                素材を探す
+              </p>
+              <div
+                style={{
+                  maxHeight: hovered === 'explore' ? '80px' : '0',
+                  overflow: 'hidden',
+                  transition: 'max-height 0.55s cubic-bezier(0.16,1,0.3,1)',
+                  marginTop: hovered === 'explore' ? '10px' : '0',
+                }}
+              >
+                <p className="text-xs leading-6" style={{ color: 'rgba(255,255,255,0.28)' }}>
+                  反物・帯地・古布など<br />全国の素材バンクを検索する
+                </p>
+              </div>
+              <div className="mt-5 flex items-center justify-end gap-3">
+                <span className="text-[7px] tracking-[0.45em]" style={{ color: 'rgba(255,255,255,0.18)' }}>
+                  ENTER
+                </span>
+                <div
+                  style={{
+                    height: '1px',
+                    width: hovered === 'explore' ? '48px' : '14px',
+                    backgroundColor: hovered === 'explore' ? 'rgba(165,155,230,0.65)' : 'rgba(255,255,255,0.1)',
+                    transition: 'all 0.55s cubic-bezier(0.16,1,0.3,1)',
+                  }}
+                />
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        {/* CENTER TITLE OVERLAY */}
+        <div
+          className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center z-30"
           style={{
-            transform: `perspective(1400px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
+            transform: `perspective(1500px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
             transition: 'transform 0.15s ease-out',
           }}
         >
-          {/* Eyebrow */}
           <p
-            className="mb-8 text-[8px] tracking-[0.75em]"
+            className="mb-7 text-[8px] tracking-[0.75em]"
             style={{
-              color: 'rgba(255,255,255,0.16)',
+              color: 'rgba(255,255,255,0.14)',
               opacity: phase >= 2 ? 1 : 0,
               transform: phase >= 2 ? 'translateY(0)' : 'translateY(18px)',
-              transition: 'all 0.9s cubic-bezier(0.16,1,0.3,1)',
+              transition: 'all 0.95s cubic-bezier(0.16,1,0.3,1)',
             }}
           >
             — 伝統工芸の素材を、未来へ結ぶ —
           </p>
 
-          {/* Title - per character */}
           <div className="flex items-end">
             {TITLE_CHARS.map((char, i) => (
               <span
                 key={i}
                 className="font-serif text-white inline-block"
                 style={{
-                  fontSize: 'clamp(60px, 10.5vw, 132px)',
+                  fontSize: 'clamp(62px, 10.5vw, 136px)',
                   fontWeight: 500,
-                  letterSpacing: '0.06em',
+                  letterSpacing: '0.07em',
                   lineHeight: 1,
                   opacity: phase >= 2 ? 1 : 0,
-                  transform: phase >= 2 ? 'translateY(0) skewY(0deg)' : 'translateY(80px) skewY(7deg)',
-                  filter: phase >= 2 ? 'blur(0px)' : 'blur(14px)',
+                  transform: phase >= 2 ? 'translateY(0) skewY(0deg)' : 'translateY(88px) skewY(8deg)',
+                  filter: phase >= 2 ? 'blur(0px)' : 'blur(16px)',
                   transition: `
-                    opacity 0.85s cubic-bezier(0.16,1,0.3,1) ${i * 0.085 + 0.05}s,
-                    transform 0.85s cubic-bezier(0.16,1,0.3,1) ${i * 0.085 + 0.05}s,
-                    filter 0.75s ease ${i * 0.085 + 0.05}s
+                    opacity 0.9s cubic-bezier(0.16,1,0.3,1) ${i * 0.09 + 0.06}s,
+                    transform 0.9s cubic-bezier(0.16,1,0.3,1) ${i * 0.09 + 0.06}s,
+                    filter 0.75s ease ${i * 0.09 + 0.06}s
                   `,
                 }}
               >
@@ -307,198 +529,18 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Accent line */}
           <div
-            className="my-9 h-px origin-center"
+            className="mt-7 h-px origin-center"
             style={{
-              width: '56px',
-              backgroundColor: 'rgba(143,63,43,0.65)',
+              width: '52px',
+              backgroundColor: 'rgba(143,63,43,0.6)',
               transform: phase >= 3 ? 'scaleX(1)' : 'scaleX(0)',
-              transition: 'transform 1.1s cubic-bezier(0.16,1,0.3,1)',
+              transition: 'transform 1.1s cubic-bezier(0.16,1,0.3,1) 0.1s',
             }}
           />
-
-          {/* Cards */}
-          <div
-            className="flex w-full max-w-2xl px-8 sm:px-0"
-            style={{
-              opacity: phase >= 3 ? 1 : 0,
-              transform: phase >= 3 ? 'translateY(0)' : 'translateY(44px)',
-              transition: 'all 1.1s cubic-bezier(0.16,1,0.3,1) 0.1s',
-            }}
-          >
-            {/* Register */}
-            <a
-              href="https://musubi-sozai-gott.vercel.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                cursor: 'none',
-                flex: hovered === 'register' ? '0 0 62%' : hovered === 'explore' ? '0 0 38%' : '1 1 0%',
-                transition: 'flex 0.65s cubic-bezier(0.16,1,0.3,1)',
-                minWidth: 0,
-              }}
-              onMouseEnter={() => setHovered('register')}
-              onMouseLeave={() => setHovered(null)}
-            >
-              <div
-                className="relative h-full overflow-hidden py-9"
-                style={{
-                  paddingLeft: 'clamp(18px, 4vw, 44px)',
-                  paddingRight: 'clamp(18px, 4vw, 44px)',
-                  borderTop: `1px solid ${hovered === 'register' ? 'rgba(180,85,45,0.55)' : 'rgba(255,255,255,0.07)'}`,
-                  borderBottom: `1px solid ${hovered === 'register' ? 'rgba(180,85,45,0.55)' : 'rgba(255,255,255,0.07)'}`,
-                  borderLeft: `1px solid ${hovered === 'register' ? 'rgba(180,85,45,0.55)' : 'rgba(255,255,255,0.07)'}`,
-                  backgroundColor: hovered === 'register' ? 'rgba(143,63,43,0.07)' : 'transparent',
-                  transition: 'border-color 0.4s ease, background-color 0.4s ease',
-                }}
-              >
-                {hovered === 'register' && (
-                  <>
-                    <div
-                      className="pointer-events-none absolute"
-                      style={{
-                        left: '50%', top: '50%',
-                        width: '96px', height: '96px',
-                        border: '1px solid rgba(143,63,43,0.38)',
-                        borderRadius: '50%',
-                        animation: 'pulse-ring 1.7s ease-out infinite',
-                      }}
-                    />
-                    <div
-                      className="pointer-events-none absolute inset-0"
-                      style={{ background: 'radial-gradient(ellipse at 32% 50%, rgba(143,63,43,0.13) 0%, transparent 68%)' }}
-                    />
-                  </>
-                )}
-                <p
-                  className="mb-2 text-[7px] tracking-[0.55em]"
-                  style={{ color: hovered === 'register' ? 'rgba(215,105,65,0.9)' : 'rgba(255,255,255,0.14)' }}
-                >
-                  FOR SUPPLIERS
-                </p>
-                <p
-                  className="font-serif font-medium text-white"
-                  style={{ fontSize: 'clamp(17px, 2.6vw, 27px)', letterSpacing: '0.05em' }}
-                >
-                  素材を登録する
-                </p>
-                <div
-                  style={{
-                    maxHeight: hovered === 'register' ? '72px' : '0',
-                    overflow: 'hidden',
-                    transition: 'max-height 0.5s cubic-bezier(0.16,1,0.3,1)',
-                    marginTop: hovered === 'register' ? '12px' : '0',
-                  }}
-                >
-                  <p className="text-xs leading-6" style={{ color: 'rgba(255,255,255,0.28)' }}>
-                    眠っている着物・帯・反物を<br />次の作り手の手へ届けましょう
-                  </p>
-                </div>
-                <div className="mt-6 flex items-center gap-3">
-                  <div
-                    style={{
-                      height: '1px',
-                      width: hovered === 'register' ? '46px' : '16px',
-                      backgroundColor: hovered === 'register' ? 'rgba(215,105,65,0.7)' : 'rgba(255,255,255,0.12)',
-                      transition: 'width 0.5s cubic-bezier(0.16,1,0.3,1), background-color 0.4s',
-                    }}
-                  />
-                  <span className="text-[7px] tracking-[0.45em]" style={{ color: 'rgba(255,255,255,0.18)' }}>
-                    ENTER
-                  </span>
-                </div>
-              </div>
-            </a>
-
-            {/* Divider */}
-            <div style={{ width: '1px', flexShrink: 0, backgroundColor: 'rgba(255,255,255,0.055)' }} />
-
-            {/* Explore */}
-            <Link
-              href="/materials"
-              style={{
-                cursor: 'none',
-                flex: hovered === 'explore' ? '0 0 62%' : hovered === 'register' ? '0 0 38%' : '1 1 0%',
-                transition: 'flex 0.65s cubic-bezier(0.16,1,0.3,1)',
-                minWidth: 0,
-              }}
-              onMouseEnter={() => setHovered('explore')}
-              onMouseLeave={() => setHovered(null)}
-            >
-              <div
-                className="relative h-full overflow-hidden py-9"
-                style={{
-                  paddingLeft: 'clamp(18px, 4vw, 44px)',
-                  paddingRight: 'clamp(18px, 4vw, 44px)',
-                  borderTop: `1px solid ${hovered === 'explore' ? 'rgba(130,120,180,0.55)' : 'rgba(255,255,255,0.07)'}`,
-                  borderBottom: `1px solid ${hovered === 'explore' ? 'rgba(130,120,180,0.55)' : 'rgba(255,255,255,0.07)'}`,
-                  borderRight: `1px solid ${hovered === 'explore' ? 'rgba(130,120,180,0.55)' : 'rgba(255,255,255,0.07)'}`,
-                  backgroundColor: hovered === 'explore' ? 'rgba(90,80,140,0.07)' : 'transparent',
-                  transition: 'border-color 0.4s ease, background-color 0.4s ease',
-                }}
-              >
-                {hovered === 'explore' && (
-                  <>
-                    <div
-                      className="pointer-events-none absolute"
-                      style={{
-                        left: '50%', top: '50%',
-                        width: '96px', height: '96px',
-                        border: '1px solid rgba(130,120,180,0.32)',
-                        borderRadius: '50%',
-                        animation: 'pulse-ring 1.7s ease-out infinite',
-                      }}
-                    />
-                    <div
-                      className="pointer-events-none absolute inset-0"
-                      style={{ background: 'radial-gradient(ellipse at 68% 50%, rgba(90,80,140,0.13) 0%, transparent 68%)' }}
-                    />
-                  </>
-                )}
-                <p
-                  className="mb-2 text-[7px] tracking-[0.55em]"
-                  style={{ color: hovered === 'explore' ? 'rgba(175,165,225,0.9)' : 'rgba(255,255,255,0.14)' }}
-                >
-                  FOR CREATORS
-                </p>
-                <p
-                  className="font-serif font-medium text-white"
-                  style={{ fontSize: 'clamp(17px, 2.6vw, 27px)', letterSpacing: '0.05em' }}
-                >
-                  素材を探す
-                </p>
-                <div
-                  style={{
-                    maxHeight: hovered === 'explore' ? '72px' : '0',
-                    overflow: 'hidden',
-                    transition: 'max-height 0.5s cubic-bezier(0.16,1,0.3,1)',
-                    marginTop: hovered === 'explore' ? '12px' : '0',
-                  }}
-                >
-                  <p className="text-xs leading-6" style={{ color: 'rgba(255,255,255,0.28)' }}>
-                    反物・帯地・古布など<br />全国の素材バンクを検索する
-                  </p>
-                </div>
-                <div className="mt-6 flex items-center gap-3">
-                  <div
-                    style={{
-                      height: '1px',
-                      width: hovered === 'explore' ? '46px' : '16px',
-                      backgroundColor: hovered === 'explore' ? 'rgba(175,165,225,0.65)' : 'rgba(255,255,255,0.12)',
-                      transition: 'width 0.5s cubic-bezier(0.16,1,0.3,1), background-color 0.4s',
-                    }}
-                  />
-                  <span className="text-[7px] tracking-[0.45em]" style={{ color: 'rgba(255,255,255,0.18)' }}>
-                    ENTER
-                  </span>
-                </div>
-              </div>
-            </Link>
-          </div>
         </div>
 
-        {/* Custom cursor dot */}
+        {/* Custom cursor */}
         <div
           className="pointer-events-none fixed z-[100] rounded-full"
           style={{
@@ -509,7 +551,6 @@ export default function Home() {
             backgroundColor: 'white',
           }}
         />
-        {/* Custom cursor ring */}
         <div
           className="pointer-events-none fixed z-[99] rounded-full border"
           style={{
@@ -519,29 +560,27 @@ export default function Home() {
             height: hovered ? '62px' : '26px',
             transform: 'translate(-50%,-50%)',
             borderColor:
-              hovered === 'register'
-                ? 'rgba(215,105,65,0.75)'
-                : hovered === 'explore'
-                  ? 'rgba(175,165,225,0.75)'
+              hovered === 'register' ? warmColor
+                : hovered === 'explore' ? coolColor
                   : 'rgba(255,255,255,0.2)',
             mixBlendMode: 'difference',
             transition:
-              'width 0.42s cubic-bezier(0.16,1,0.3,1), height 0.42s cubic-bezier(0.16,1,0.3,1), border-color 0.3s ease',
+              'width 0.44s cubic-bezier(0.16,1,0.3,1), height 0.44s cubic-bezier(0.16,1,0.3,1), border-color 0.3s ease',
           }}
         />
 
         {/* Footer */}
         <div
-          className="absolute bottom-6 left-24 z-30"
-          style={{ opacity: phase >= 3 ? 1 : 0, transition: 'opacity 1s ease 0.9s' }}
+          className="absolute bottom-5 left-24 z-40"
+          style={{ opacity: phase >= 4 ? 1 : 0, transition: 'opacity 1s ease' }}
         >
           <p className="text-[7px] tracking-[0.5em]" style={{ color: 'rgba(255,255,255,0.08)' }}>
             © 2026 MUSUBI MATERIAL BANK
           </p>
         </div>
         <div
-          className="absolute bottom-6 right-24 z-30"
-          style={{ opacity: phase >= 3 ? 1 : 0, transition: 'opacity 1s ease 1s' }}
+          className="absolute bottom-5 right-24 z-40"
+          style={{ opacity: phase >= 4 ? 1 : 0, transition: 'opacity 1s ease 0.1s' }}
         >
           <p className="text-[7px] tracking-[0.5em]" style={{ color: 'rgba(255,255,255,0.08)' }}>
             MATERIAL ARCHIVE
