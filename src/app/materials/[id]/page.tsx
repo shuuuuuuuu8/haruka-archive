@@ -4,24 +4,26 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, MessageSquare } from 'lucide-react'
 import { StatusBadge, VerifiedBadge } from '@/components/ui/StatusBadge'
-import { MATERIALS } from '@/lib/data'
+import { getAllMaterials } from '@/lib/get-materials'
 import { QUANTITY_SIZE_LABELS } from '@/types/material'
 
-export function generateStaticParams() {
-  return MATERIALS.map((material) => ({ id: material.id }))
+export const revalidate = 300
+export const dynamicParams = true
+
+export async function generateStaticParams() {
+  const materials = await getAllMaterials()
+  return materials.map((material) => ({ id: material.id }))
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const material = MATERIALS.find((item) => item.id === id)
+  const materials = await getAllMaterials()
+  const material = materials.find((item) => item.id === id)
 
   if (!material) {
     return {
       title: '素材が見つかりません',
-      robots: {
-        index: false,
-        follow: false,
-      },
+      robots: { index: false, follow: false },
     }
   }
 
@@ -31,20 +33,13 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     title,
     description,
-    alternates: {
-      canonical: `/materials/${material.id}`,
-    },
+    alternates: { canonical: `/materials/${material.id}` },
     openGraph: {
       title,
       description,
       url: `/materials/${material.id}`,
       type: 'article',
-      images: [
-        {
-          url: material.images[0],
-          alt: material.name,
-        },
-      ],
+      images: [{ url: material.images[0], alt: material.name }],
     },
     twitter: {
       card: 'summary_large_image',
@@ -57,7 +52,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function MaterialDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const material = MATERIALS.find((item) => item.id === id)
+  const materials = await getAllMaterials()
+  const material = materials.find((item) => item.id === id)
   if (!material) notFound()
 
   return (
@@ -122,38 +118,46 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
             </dl>
 
             <div className="mt-8 space-y-6">
-              <section>
-                <h2 className="font-serif text-xl">背景ストーリー</h2>
-                <p className="mt-3 text-sm leading-8" style={{ color: 'var(--text-muted)' }}>
-                  {material.story}
-                </p>
-              </section>
-              <section>
-                <h2 className="font-serif text-xl">活用可能性</h2>
-                <p className="mt-3 text-sm leading-8" style={{ color: 'var(--text-muted)' }}>
-                  {material.characteristics}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {material.recommendedUses.map((use) => (
-                    <span key={use} className="px-2 py-1 text-xs" style={{ backgroundColor: 'var(--accent-pale)', color: 'var(--accent)' }}>
-                      {use}
-                    </span>
-                  ))}
-                </div>
-              </section>
+              {material.story && (
+                <section>
+                  <h2 className="font-serif text-xl">背景ストーリー</h2>
+                  <p className="mt-3 text-sm leading-8" style={{ color: 'var(--text-muted)' }}>
+                    {material.story}
+                  </p>
+                </section>
+              )}
+              {material.characteristics && (
+                <section>
+                  <h2 className="font-serif text-xl">活用可能性</h2>
+                  <p className="mt-3 text-sm leading-8" style={{ color: 'var(--text-muted)' }}>
+                    {material.characteristics}
+                  </p>
+                  {material.recommendedUses.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {material.recommendedUses.map((use) => (
+                        <span key={use} className="px-2 py-1 text-xs" style={{ backgroundColor: 'var(--accent-pale)', color: 'var(--accent)' }}>
+                          {use}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              )}
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-2">
-              {material.verifiedFields.map((field) => (
-                <VerifiedBadge key={field} type="verified" label={field} />
-              ))}
-              {material.pendingFields.map((field) => (
-                <VerifiedBadge key={field} type="pending" label={field} />
-              ))}
-              {material.estimatedFields.map((field) => (
-                <VerifiedBadge key={field} type="estimated" label={field} />
-              ))}
-            </div>
+            {(material.verifiedFields.length > 0 || material.pendingFields.length > 0 || material.estimatedFields.length > 0) && (
+              <div className="mt-8 flex flex-wrap gap-2">
+                {material.verifiedFields.map((field) => (
+                  <VerifiedBadge key={field} type="verified" label={field} />
+                ))}
+                {material.pendingFields.map((field) => (
+                  <VerifiedBadge key={field} type="pending" label={field} />
+                ))}
+                {material.estimatedFields.map((field) => (
+                  <VerifiedBadge key={field} type="estimated" label={field} />
+                ))}
+              </div>
+            )}
 
             <div className="mt-8 border p-5" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
               <p className="text-[10px] tracking-[0.2em]" style={{ color: 'var(--text-muted)' }}>
