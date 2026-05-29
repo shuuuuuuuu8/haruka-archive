@@ -85,6 +85,25 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
 
   return (
     <main style={{ backgroundColor: '#fbfaf7' }}>
+      {/* 素材登録CTA */}
+      <div className="border-b px-4 py-4 sm:px-6" style={{ borderColor: 'var(--border)', backgroundColor: '#fffefa' }}>
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            <span className="mr-2 font-medium" style={{ color: 'var(--text)' }}>素材をお持ちの方へ</span>
+            着物・帯・反物などをプラットフォームに登録して、必要とする作り手へ届けましょう。
+          </p>
+          <a
+            href="https://musubi-sozai-gott.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 border px-5 py-2 text-xs transition-opacity hover:opacity-70"
+            style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}
+          >
+            素材を登録する →
+          </a>
+        </div>
+      </div>
+
       <section className="border-b px-4 pb-6 pt-24 sm:px-6" style={{ borderColor: 'var(--border)', backgroundColor: '#fffefa' }}>
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
@@ -149,28 +168,6 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
           </div>
         </div>
       </section>
-
-      {/* 素材登録CTA */}
-      <div className="border-y px-4 py-10 sm:px-6" style={{ borderColor: 'var(--border)', backgroundColor: '#fffefa' }}>
-        <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
-          <div>
-            <p className="mb-1 text-xs tracking-[0.2em]" style={{ color: 'var(--accent)' }}>FOR SUPPLIERS</p>
-            <p className="text-lg font-medium">眠っている素材をお持ちですか？</p>
-            <p className="mt-1 text-sm leading-6" style={{ color: 'var(--text-muted)' }}>
-              着物・帯・反物などをプラットフォームに登録して、必要とする作り手へ届けましょう。
-            </p>
-          </div>
-          <a
-            href="https://musubi-sozai-gott.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="shrink-0 border px-6 py-3 text-sm transition-colors hover:opacity-80"
-            style={{ borderColor: 'var(--accent)', color: 'var(--accent)', backgroundColor: 'transparent' }}
-          >
-            素材を登録する →
-          </a>
-        </div>
-      </div>
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
