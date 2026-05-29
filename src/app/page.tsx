@@ -342,28 +342,28 @@ export default function Home() {
             href="https://musubi-sozai-gott.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className="relative flex flex-col justify-end overflow-hidden"
+            className="relative flex flex-col items-start justify-center overflow-hidden"
             style={{
               cursor: 'none',
               flex: hovered === 'register' ? '0 0 64%' : hovered === 'explore' ? '0 0 36%' : '1 1 0%',
               transition: 'flex 0.65s cubic-bezier(0.16,1,0.3,1)',
               minWidth: 0,
-              padding: 'clamp(20px, 4vw, 52px)',
-              paddingBottom: 'clamp(28px, 5vw, 60px)',
+              paddingLeft: 'clamp(28px, 7vw, 80px)',
+              paddingRight: 'clamp(20px, 4vw, 52px)',
+              paddingTop: '20px',
+              paddingBottom: '20px',
             }}
             onMouseEnter={() => setHovered('register')}
             onMouseLeave={() => setHovered(null)}
           >
-            {/* Corner brackets */}
             {(['tl', 'tr', 'bl', 'br'] as const).map(pos => (
               <Corner
                 key={pos}
                 pos={pos}
-                color={hovered === 'register' ? warmColor : 'rgba(255,255,255,0.1)'}
+                color={hovered === 'register' ? warmColor : 'rgba(255,255,255,0.14)'}
               />
             ))}
 
-            {/* Bottom-left content */}
             <div
               style={{
                 opacity: phase >= 3 ? 1 : 0,
@@ -372,40 +372,41 @@ export default function Home() {
               }}
             >
               <p
-                className="mb-2 text-[7px] tracking-[0.58em]"
-                style={{ color: hovered === 'register' ? 'rgba(215,105,60,0.95)' : 'rgba(255,255,255,0.18)' }}
+                className="mb-3 text-[8px] tracking-[0.55em]"
+                style={{ color: hovered === 'register' ? 'rgba(215,105,60,1)' : 'rgba(255,255,255,0.38)' }}
               >
                 FOR SUPPLIERS
               </p>
               <p
                 className="font-serif font-medium text-white"
-                style={{ fontSize: 'clamp(18px, 2.8vw, 30px)', letterSpacing: '0.05em' }}
+                style={{ fontSize: 'clamp(24px, 3.8vw, 44px)', letterSpacing: '0.04em', lineHeight: 1.2 }}
               >
-                素材を登録する
+                素材を<br />登録する
               </p>
-              <div
+              <p
+                className="mt-4 text-sm leading-7"
                 style={{
-                  maxHeight: hovered === 'register' ? '80px' : '0',
-                  overflow: 'hidden',
-                  transition: 'max-height 0.55s cubic-bezier(0.16,1,0.3,1)',
-                  marginTop: hovered === 'register' ? '10px' : '0',
+                  color: hovered === 'register' ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.32)',
+                  maxWidth: '18em',
+                  transition: 'color 0.4s ease',
                 }}
               >
-                <p className="text-xs leading-6" style={{ color: 'rgba(255,255,255,0.28)' }}>
-                  眠っている着物・帯・反物を<br />次の作り手の手へ届けましょう
-                </p>
-              </div>
-              <div className="mt-5 flex items-center gap-3">
+                眠っている着物・帯・反物を<br />次の作り手の手へ届けましょう
+              </p>
+              <div className="mt-6 flex items-center gap-3">
                 <div
                   style={{
                     height: '1px',
-                    width: hovered === 'register' ? '48px' : '14px',
-                    backgroundColor: hovered === 'register' ? 'rgba(215,105,60,0.7)' : 'rgba(255,255,255,0.1)',
+                    width: hovered === 'register' ? '52px' : '20px',
+                    backgroundColor: hovered === 'register' ? 'rgba(215,105,60,0.8)' : 'rgba(255,255,255,0.2)',
                     transition: 'all 0.55s cubic-bezier(0.16,1,0.3,1)',
                   }}
                 />
-                <span className="text-[7px] tracking-[0.45em]" style={{ color: 'rgba(255,255,255,0.18)' }}>
-                  ENTER
+                <span
+                  className="text-[8px] tracking-[0.45em]"
+                  style={{ color: hovered === 'register' ? 'rgba(215,105,60,0.9)' : 'rgba(255,255,255,0.3)' }}
+                >
+                  ENTER →
                 </span>
               </div>
             </div>
@@ -414,14 +415,16 @@ export default function Home() {
           {/* RIGHT: Explore */}
           <Link
             href="/materials"
-            className="relative flex flex-col justify-end overflow-hidden"
+            className="relative flex flex-col items-end justify-center overflow-hidden"
             style={{
               cursor: 'none',
               flex: hovered === 'explore' ? '0 0 64%' : hovered === 'register' ? '0 0 36%' : '1 1 0%',
               transition: 'flex 0.65s cubic-bezier(0.16,1,0.3,1)',
               minWidth: 0,
-              padding: 'clamp(20px, 4vw, 52px)',
-              paddingBottom: 'clamp(28px, 5vw, 60px)',
+              paddingRight: 'clamp(28px, 7vw, 80px)',
+              paddingLeft: 'clamp(20px, 4vw, 52px)',
+              paddingTop: '20px',
+              paddingBottom: '20px',
             }}
             onMouseEnter={() => setHovered('explore')}
             onMouseLeave={() => setHovered(null)}
@@ -430,11 +433,10 @@ export default function Home() {
               <Corner
                 key={pos}
                 pos={pos}
-                color={hovered === 'explore' ? coolColor : 'rgba(255,255,255,0.1)'}
+                color={hovered === 'explore' ? coolColor : 'rgba(255,255,255,0.14)'}
               />
             ))}
 
-            {/* Bottom-right content */}
             <div
               className="flex flex-col items-end text-right"
               style={{
@@ -444,38 +446,39 @@ export default function Home() {
               }}
             >
               <p
-                className="mb-2 text-[7px] tracking-[0.58em]"
-                style={{ color: hovered === 'explore' ? 'rgba(165,155,230,0.95)' : 'rgba(255,255,255,0.18)' }}
+                className="mb-3 text-[8px] tracking-[0.55em]"
+                style={{ color: hovered === 'explore' ? 'rgba(165,155,230,1)' : 'rgba(255,255,255,0.38)' }}
               >
                 FOR CREATORS
               </p>
               <p
                 className="font-serif font-medium text-white"
-                style={{ fontSize: 'clamp(18px, 2.8vw, 30px)', letterSpacing: '0.05em' }}
+                style={{ fontSize: 'clamp(24px, 3.8vw, 44px)', letterSpacing: '0.04em', lineHeight: 1.2 }}
               >
-                素材を探す
+                素材を<br />探す
               </p>
-              <div
+              <p
+                className="mt-4 text-sm leading-7"
                 style={{
-                  maxHeight: hovered === 'explore' ? '80px' : '0',
-                  overflow: 'hidden',
-                  transition: 'max-height 0.55s cubic-bezier(0.16,1,0.3,1)',
-                  marginTop: hovered === 'explore' ? '10px' : '0',
+                  color: hovered === 'explore' ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.32)',
+                  maxWidth: '18em',
+                  transition: 'color 0.4s ease',
                 }}
               >
-                <p className="text-xs leading-6" style={{ color: 'rgba(255,255,255,0.28)' }}>
-                  反物・帯地・古布など<br />全国の素材バンクを検索する
-                </p>
-              </div>
-              <div className="mt-5 flex items-center justify-end gap-3">
-                <span className="text-[7px] tracking-[0.45em]" style={{ color: 'rgba(255,255,255,0.18)' }}>
-                  ENTER
+                反物・帯地・古布など<br />全国の素材バンクを検索する
+              </p>
+              <div className="mt-6 flex items-center justify-end gap-3">
+                <span
+                  className="text-[8px] tracking-[0.45em]"
+                  style={{ color: hovered === 'explore' ? 'rgba(165,155,230,0.9)' : 'rgba(255,255,255,0.3)' }}
+                >
+                  ← ENTER
                 </span>
                 <div
                   style={{
                     height: '1px',
-                    width: hovered === 'explore' ? '48px' : '14px',
-                    backgroundColor: hovered === 'explore' ? 'rgba(165,155,230,0.65)' : 'rgba(255,255,255,0.1)',
+                    width: hovered === 'explore' ? '52px' : '20px',
+                    backgroundColor: hovered === 'explore' ? 'rgba(165,155,230,0.7)' : 'rgba(255,255,255,0.2)',
                     transition: 'all 0.55s cubic-bezier(0.16,1,0.3,1)',
                   }}
                 />
