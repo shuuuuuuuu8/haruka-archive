@@ -92,6 +92,7 @@ interface MusubiMaterialRow {
   category: string
   fabric_type: string
   condition: string
+  color: string | null
   quantity: number
   price: number | null
   is_negotiable: boolean
@@ -109,7 +110,7 @@ export async function fetchMusubiMaterials(): Promise<Material[]> {
       .from('materials')
       .select(
         `
-        id, name, category, fabric_type, condition,
+        id, name, category, fabric_type, condition, color,
         quantity, price, is_negotiable, story,
         cultural_significance, era, region, created_at,
         material_images(storage_path, is_primary, order_index)
@@ -132,12 +133,15 @@ export async function fetchMusubiMaterials(): Promise<Material[]> {
       // カテゴリ: fabric_type優先、次にcategory
       const category = FABRIC_MAP[m.fabric_type] ?? CATEGORY_MAP[m.category] ?? 'その他'
 
+      const COLOR_GROUP_VALUES: ColorGroup[] = ['白系', '黒系', '藍系', '赤系', '金系', '茶系', '緑系', '多色', 'その他']
+      const colorGroup: ColorGroup = (COLOR_GROUP_VALUES.includes(m.color as ColorGroup) ? m.color : 'その他') as ColorGroup
+
       const material: Material = {
         id: `MSB-${m.id.slice(0, 8).toUpperCase()}`,
         name: m.name,
         category,
         materialType: fabricLabels[m.fabric_type] ?? '不明',
-        color: '多色' as ColorGroup,
+        color: colorGroup,
         pattern: 'その他' as PatternType,
         origin: m.region ?? '日本',
         era: mapEra(m.era),
