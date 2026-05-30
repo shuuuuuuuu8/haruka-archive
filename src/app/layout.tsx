@@ -3,7 +3,7 @@ import './globals.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://haruka-archive.vercel.app'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.musubi-sozaibank.com'
 const siteName = '結 素材バンク'
 const siteDescription =
   '日本各地の老舗や職人工房に眠る未活用素材・デッドストック素材をデータ化し、企業や個人デザイナーが目的に合った素材を探せる素材検索プラットフォームです。'

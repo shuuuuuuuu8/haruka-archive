@@ -1,41 +1,28 @@
 import type { MetadataRoute } from 'next'
-import { MATERIALS } from '@/lib/data'
+import { getAllMaterials } from '@/lib/get-materials'
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://haruka-archive.vercel.app'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.musubi-sozaibank.com'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const revalidate = 300
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const materials = await getAllMaterials()
   const now = new Date()
 
-  return [
-    {
-      url: `${siteUrl}/`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 1,
-    },
-    {
-      url: `${siteUrl}/materials`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${siteUrl}/about`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/partners`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    ...MATERIALS.map((material) => ({
-      url: `${siteUrl}/materials/${material.id}`,
-      lastModified: new Date(material.updatedAt),
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    })),
+  const staticRoutes: MetadataRoute.Sitemap = [
+    { url: `${siteUrl}/`, lastModified: now, changeFrequency: 'weekly', priority: 1.0 },
+    { url: `${siteUrl}/materials`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${siteUrl}/inquiry`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${siteUrl}/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${siteUrl}/partners`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
   ]
+
+  const materialRoutes: MetadataRoute.Sitemap = materials.map((m) => ({
+    url: `${siteUrl}/materials/${m.id}`,
+    lastModified: new Date(m.updatedAt ?? m.createdAt),
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }))
+
+  return [...staticRoutes, ...materialRoutes]
 }
