@@ -3,8 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 
-const TITLE_CHARS = ['素', '材', 'バ', 'ン', 'ク']
-
 function Corner({ pos, color }: { pos: 'tl' | 'tr' | 'bl' | 'br'; color: string }) {
   const style: React.CSSProperties = {
     position: 'absolute',
@@ -153,8 +151,6 @@ export default function Home() {
     if (trailRef.current.length > 32) trailRef.current.shift()
   }
 
-  const tiltX = (smoothMouse.y - 0.5) * -3.5
-  const tiltY = (smoothMouse.x - 0.5) * 3.5
   const pX = (smoothMouse.x - 0.5) * 18
   const pY = (smoothMouse.y - 0.5) * 18
 
@@ -339,7 +335,7 @@ export default function Home() {
 
           {/* LEFT: Register */}
           <a
-            href="https://musubi-sozai-gott.vercel.app/"
+            href="https://musubi-sozai.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="relative flex flex-col items-start justify-center overflow-hidden"
@@ -485,62 +481,6 @@ export default function Home() {
               </div>
             </div>
           </Link>
-        </div>
-
-        {/* CENTER TITLE OVERLAY */}
-        <div
-          className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center z-30"
-          style={{
-            transform: `perspective(1500px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
-            transition: 'transform 0.15s ease-out',
-          }}
-        >
-          <p
-            className="mb-7 text-[8px] tracking-[0.75em]"
-            style={{
-              color: 'rgba(255,255,255,0.14)',
-              opacity: phase >= 2 ? 1 : 0,
-              transform: phase >= 2 ? 'translateY(0)' : 'translateY(18px)',
-              transition: 'all 0.95s cubic-bezier(0.16,1,0.3,1)',
-            }}
-          >
-            — 伝統工芸の素材を、未来へ結ぶ —
-          </p>
-
-          <div className="flex items-end">
-            {TITLE_CHARS.map((char, i) => (
-              <span
-                key={i}
-                className="font-serif text-white inline-block"
-                style={{
-                  fontSize: 'clamp(62px, 10.5vw, 136px)',
-                  fontWeight: 500,
-                  letterSpacing: '0.07em',
-                  lineHeight: 1,
-                  opacity: phase >= 2 ? 1 : 0,
-                  transform: phase >= 2 ? 'translateY(0) skewY(0deg)' : 'translateY(88px) skewY(8deg)',
-                  filter: phase >= 2 ? 'blur(0px)' : 'blur(16px)',
-                  transition: `
-                    opacity 0.9s cubic-bezier(0.16,1,0.3,1) ${i * 0.09 + 0.06}s,
-                    transform 0.9s cubic-bezier(0.16,1,0.3,1) ${i * 0.09 + 0.06}s,
-                    filter 0.75s ease ${i * 0.09 + 0.06}s
-                  `,
-                }}
-              >
-                {char}
-              </span>
-            ))}
-          </div>
-
-          <div
-            className="mt-7 h-px origin-center"
-            style={{
-              width: '52px',
-              backgroundColor: 'rgba(143,63,43,0.6)',
-              transform: phase >= 3 ? 'scaleX(1)' : 'scaleX(0)',
-              transition: 'transform 1.1s cubic-bezier(0.16,1,0.3,1) 0.1s',
-            }}
-          />
         </div>
 
         {/* Custom cursor */}

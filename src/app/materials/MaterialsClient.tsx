@@ -93,7 +93,7 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
             着物・帯・反物などをプラットフォームに登録して、必要とする作り手へ届けましょう。
           </p>
           <a
-            href="https://musubi-sozai-gott.vercel.app/"
+            href="https://musubi-sozai.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="shrink-0 border px-5 py-2 text-xs transition-opacity hover:opacity-70"
