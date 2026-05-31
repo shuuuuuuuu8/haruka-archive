@@ -11,7 +11,7 @@ function Corner({ pos, color }: { pos: 'tl' | 'tr' | 'bl' | 'br'; color: string 
     borderColor: color,
     borderStyle: 'solid',
     borderWidth: 0,
-    transition: 'opacity 0.4s ease',
+    transition: 'border-color 0.4s ease',
   }
   if (pos === 'tl') { style.top = 16; style.left = 16; style.borderTopWidth = 1; style.borderLeftWidth = 1 }
   if (pos === 'tr') { style.top = 16; style.right = 16; style.borderTopWidth = 1; style.borderRightWidth = 1 }
@@ -25,12 +25,20 @@ export default function Home() {
   const [hovered, setHovered] = useState<'register' | 'explore' | null>(null)
   const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 })
   const [smoothMouse, setSmoothMouse] = useState({ x: 0.5, y: 0.5 })
+  const [isMobile, setIsMobile] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const mouseRafRef = useRef<number>(0)
   const canvasRafRef = useRef<number>(0)
   const mouseRef = useRef({ x: 0.5, y: 0.5 })
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const trailRef = useRef<Array<{ x: number; y: number; age: number }>>([])
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase(1), 100)
@@ -72,7 +80,6 @@ export default function Home() {
       const draw = () => {
         ctx.clearRect(0, 0, W, H)
 
-        // Trail
         trailRef.current = trailRef.current
           .map(p => ({ ...p, age: p.age + 0.045 }))
           .filter(p => p.age < 1)
@@ -83,13 +90,11 @@ export default function Home() {
           ctx.fill()
         }
 
-        // Update particles
         for (const p of pts) {
           p.x = (p.x + p.vx + W) % W
           p.y = (p.y + p.vy + H) % H
         }
 
-        // Constellation lines
         ctx.lineWidth = 0.4
         for (let i = 0; i < pts.length; i++) {
           for (let j = i + 1; j < pts.length; j++) {
@@ -111,7 +116,6 @@ export default function Home() {
           }
         }
 
-        // Particles
         for (const p of pts) {
           ctx.beginPath()
           ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
@@ -141,6 +145,7 @@ export default function Home() {
   }, [])
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (isMobile) return
     const rect = containerRef.current?.getBoundingClientRect()
     if (!rect) return
     const x = (e.clientX - rect.left) / rect.width
@@ -176,18 +181,12 @@ export default function Home() {
         @keyframes vline-drop {
           from{transform:scaleY(0);opacity:0} to{transform:scaleY(1);opacity:1}
         }
-        @keyframes float-slow {
-          0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)}
-        }
-        @keyframes panel-overlay-in {
-          from{opacity:0} to{opacity:1}
-        }
       `}</style>
 
       <div
         ref={containerRef}
         className="relative h-screen w-screen overflow-hidden"
-        style={{ backgroundColor: '#060504', cursor: 'none' }}
+        style={{ backgroundColor: '#060504', cursor: isMobile ? 'auto' : 'none' }}
         onMouseMove={handleMouseMove}
       >
         <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 z-10" />
@@ -216,7 +215,7 @@ export default function Home() {
         <div
           className="pointer-events-none absolute inset-y-0 left-0 z-[5]"
           style={{
-            width: seamLeft,
+            width: isMobile ? '100%' : seamLeft,
             background: 'radial-gradient(ellipse at 28% 50%, rgba(143,63,43,0.18) 0%, transparent 65%)',
             transition: 'width 0.65s cubic-bezier(0.16,1,0.3,1)',
           }}
@@ -226,39 +225,43 @@ export default function Home() {
         <div
           className="pointer-events-none absolute inset-y-0 right-0 z-[5]"
           style={{
-            width: hovered === 'explore' ? '64%' : hovered === 'register' ? '36%' : '50%',
+            width: isMobile ? '100%' : (hovered === 'explore' ? '64%' : hovered === 'register' ? '36%' : '50%'),
             background: 'radial-gradient(ellipse at 72% 50%, rgba(65,50,120,0.18) 0%, transparent 65%)',
             transition: 'width 0.65s cubic-bezier(0.16,1,0.3,1)',
           }}
         />
 
-        {/* Mouse spotlight */}
-        <div
-          className="pointer-events-none absolute z-[6]"
-          style={{
-            left: `${smoothMouse.x * 100}%`,
-            top: `${smoothMouse.y * 100}%`,
-            width: '900px', height: '900px',
-            transform: 'translate(-50%,-50%)',
-            background: hovered === 'register'
-              ? 'radial-gradient(circle, rgba(143,63,43,0.13) 0%, transparent 65%)'
-              : hovered === 'explore'
-                ? 'radial-gradient(circle, rgba(65,50,120,0.13) 0%, transparent 65%)'
-                : 'radial-gradient(circle, rgba(255,255,255,0.035) 0%, transparent 65%)',
-          }}
-        />
+        {/* Mouse spotlight - desktop only */}
+        {!isMobile && (
+          <div
+            className="pointer-events-none absolute z-[6]"
+            style={{
+              left: `${smoothMouse.x * 100}%`,
+              top: `${smoothMouse.y * 100}%`,
+              width: '900px', height: '900px',
+              transform: 'translate(-50%,-50%)',
+              background: hovered === 'register'
+                ? 'radial-gradient(circle, rgba(143,63,43,0.13) 0%, transparent 65%)'
+                : hovered === 'explore'
+                  ? 'radial-gradient(circle, rgba(65,50,120,0.13) 0%, transparent 65%)'
+                  : 'radial-gradient(circle, rgba(255,255,255,0.035) 0%, transparent 65%)',
+            }}
+          />
+        )}
 
-        {/* Seam line */}
-        <div
-          className="pointer-events-none absolute inset-y-0 z-[8]"
-          style={{
-            left: seamLeft,
-            width: '1px',
-            background: 'linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.1) 15%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.1) 85%, transparent 100%)',
-            animation: 'seam-glow 5s ease-in-out infinite',
-            transition: 'left 0.65s cubic-bezier(0.16,1,0.3,1)',
-          }}
-        />
+        {/* Seam line - desktop only */}
+        {!isMobile && (
+          <div
+            className="pointer-events-none absolute inset-y-0 z-[8]"
+            style={{
+              left: seamLeft,
+              width: '1px',
+              background: 'linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.1) 15%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.1) 85%, transparent 100%)',
+              animation: 'seam-glow 5s ease-in-out infinite',
+              transition: 'left 0.65s cubic-bezier(0.16,1,0.3,1)',
+            }}
+          />
+        )}
 
         {/* Background 結 */}
         <div
@@ -276,62 +279,82 @@ export default function Home() {
           結
         </div>
 
-        {/* Left vertical accent line */}
-        <div
-          className="pointer-events-none absolute left-[72px] top-0 h-full w-px origin-top z-[4]"
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.022)',
-            animation: phase >= 1 ? 'vline-drop 1.4s cubic-bezier(0.16,1,0.3,1) 0.2s both' : 'none',
-          }}
-        />
-        {/* Right vertical accent line */}
-        <div
-          className="pointer-events-none absolute right-[72px] top-0 h-full w-px origin-top z-[4]"
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.022)',
-            animation: phase >= 1 ? 'vline-drop 1.4s cubic-bezier(0.16,1,0.3,1) 0.35s both' : 'none',
-          }}
-        />
+        {/* Vertical accent lines - desktop only */}
+        {!isMobile && (
+          <>
+            <div
+              className="pointer-events-none absolute left-[72px] top-0 h-full w-px origin-top z-[4]"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.022)',
+                animation: phase >= 1 ? 'vline-drop 1.4s cubic-bezier(0.16,1,0.3,1) 0.2s both' : 'none',
+              }}
+            />
+            <div
+              className="pointer-events-none absolute right-[72px] top-0 h-full w-px origin-top z-[4]"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.022)',
+                animation: phase >= 1 ? 'vline-drop 1.4s cubic-bezier(0.16,1,0.3,1) 0.35s both' : 'none',
+              }}
+            />
+          </>
+        )}
 
-        {/* Header */}
-        <div
-          className="absolute left-24 top-7 z-40"
-          style={{ opacity: phase >= 1 ? 1 : 0, transition: 'opacity 0.9s ease' }}
-        >
-          <p className="font-serif text-xl font-medium text-white" style={{ letterSpacing: '0.2em' }}>結</p>
-          <p className="mt-0.5 text-[7px] tracking-[0.55em]" style={{ color: 'rgba(255,255,255,0.15)' }}>
-            MUSUBI MATERIAL BANK
-          </p>
-        </div>
-        <div
-          className="absolute right-24 top-7 z-40 text-right"
-          style={{ opacity: phase >= 1 ? 1 : 0, transition: 'opacity 0.9s ease 0.1s' }}
-        >
-          <p className="text-[7px] tracking-[0.45em]" style={{ color: 'rgba(255,255,255,0.1)' }}>
-            KYOTO · ISHIKAWA · JAPAN
-          </p>
-        </div>
+        {/* Vertical side text - desktop only */}
+        {!isMobile && (
+          <>
+            <div
+              className="pointer-events-none absolute left-7 top-1/2 z-40 -translate-y-1/2"
+              style={{ writingMode: 'vertical-rl', opacity: phase >= 2 ? 1 : 0, transition: 'opacity 1.2s ease 1s' }}
+            >
+              <p className="text-[7px] tracking-[0.5em]" style={{ color: 'rgba(255,255,255,0.08)' }}>
+                未活用素材バンク
+              </p>
+            </div>
+            <div
+              className="pointer-events-none absolute right-7 top-1/2 z-40 -translate-y-1/2"
+              style={{ writingMode: 'vertical-rl', opacity: phase >= 2 ? 1 : 0, transition: 'opacity 1.2s ease 1.1s' }}
+            >
+              <p className="text-[7px] tracking-[0.5em]" style={{ color: 'rgba(255,255,255,0.08)' }}>
+                伝統工芸の素材を繋ぐ
+              </p>
+            </div>
+          </>
+        )}
 
-        {/* Vertical side text */}
-        <div
-          className="pointer-events-none absolute left-7 top-1/2 z-40 -translate-y-1/2"
-          style={{ writingMode: 'vertical-rl', opacity: phase >= 2 ? 1 : 0, transition: 'opacity 1.2s ease 1s' }}
-        >
-          <p className="text-[7px] tracking-[0.5em]" style={{ color: 'rgba(255,255,255,0.08)' }}>
-            未活用素材バンク
-          </p>
-        </div>
-        <div
-          className="pointer-events-none absolute right-7 top-1/2 z-40 -translate-y-1/2"
-          style={{ writingMode: 'vertical-rl', opacity: phase >= 2 ? 1 : 0, transition: 'opacity 1.2s ease 1.1s' }}
-        >
-          <p className="text-[7px] tracking-[0.5em]" style={{ color: 'rgba(255,255,255,0.08)' }}>
-            伝統工芸の素材を繋ぐ
-          </p>
-        </div>
+        {/* Center tagline - desktop only */}
+        {!isMobile && (
+          <div
+            className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center z-30"
+            style={{
+              opacity: phase >= 2 ? 1 : 0,
+              transition: 'opacity 1s ease 0.5s',
+            }}
+          >
+            <p
+              className="text-[8px] tracking-[0.6em]"
+              style={{ color: 'rgba(255,255,255,0.2)' }}
+            >
+              — 伝統工芸の素材を、未来へ結ぶ —
+            </p>
+            <p
+              className="mt-3 text-xs leading-7 text-center"
+              style={{
+                color: 'rgba(255,255,255,0.28)',
+                maxWidth: '22em',
+                opacity: phase >= 3 ? 1 : 0,
+                transition: 'opacity 1s ease 0.8s',
+              }}
+            >
+              日本各地の老舗・工房の着物・帯・反物を<br />必要とする作り手へ届ける
+            </p>
+          </div>
+        )}
 
         {/* SPLIT PANELS */}
-        <div className="absolute inset-0 flex z-20">
+        <div
+          className="absolute inset-0 z-20"
+          style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row' }}
+        >
 
           {/* LEFT: Register */}
           <a
@@ -340,17 +363,22 @@ export default function Home() {
             rel="noopener noreferrer"
             className="relative flex flex-col items-start justify-center overflow-hidden"
             style={{
-              cursor: 'none',
-              flex: hovered === 'register' ? '0 0 64%' : hovered === 'explore' ? '0 0 36%' : '1 1 0%',
-              transition: 'flex 0.65s cubic-bezier(0.16,1,0.3,1)',
+              cursor: isMobile ? 'pointer' : 'none',
+              ...(isMobile
+                ? { width: '100%', height: '50%', flex: 'none' }
+                : {
+                    flex: hovered === 'register' ? '0 0 64%' : hovered === 'explore' ? '0 0 36%' : '1 1 0%',
+                    transition: 'flex 0.65s cubic-bezier(0.16,1,0.3,1)',
+                  }
+              ),
               minWidth: 0,
               paddingLeft: 'clamp(28px, 7vw, 80px)',
               paddingRight: 'clamp(20px, 4vw, 52px)',
-              paddingTop: '20px',
+              paddingTop: isMobile ? '72px' : '20px',
               paddingBottom: '20px',
             }}
-            onMouseEnter={() => setHovered('register')}
-            onMouseLeave={() => setHovered(null)}
+            onMouseEnter={() => !isMobile && setHovered('register')}
+            onMouseLeave={() => !isMobile && setHovered(null)}
           >
             {(['tl', 'tr', 'bl', 'br'] as const).map(pos => (
               <Corner
@@ -359,6 +387,13 @@ export default function Home() {
                 color={hovered === 'register' ? warmColor : 'rgba(255,255,255,0.14)'}
               />
             ))}
+
+            {isMobile && (
+              <div
+                className="absolute bottom-0 left-0 right-0 h-px"
+                style={{ background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent)' }}
+              />
+            )}
 
             <div
               style={{
@@ -369,7 +404,7 @@ export default function Home() {
             >
               <p
                 className="mb-3 text-[8px] tracking-[0.55em]"
-                style={{ color: hovered === 'register' ? 'rgba(215,105,60,1)' : 'rgba(255,255,255,0.38)' }}
+                style={{ color: hovered === 'register' ? 'rgba(215,105,60,1)' : 'rgba(255,255,255,0.5)' }}
               >
                 FOR SUPPLIERS
               </p>
@@ -382,7 +417,7 @@ export default function Home() {
               <p
                 className="mt-4 text-sm leading-7"
                 style={{
-                  color: hovered === 'register' ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.32)',
+                  color: hovered === 'register' ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.6)',
                   maxWidth: '18em',
                   transition: 'color 0.4s ease',
                 }}
@@ -400,7 +435,7 @@ export default function Home() {
                 />
                 <span
                   className="text-[8px] tracking-[0.45em]"
-                  style={{ color: hovered === 'register' ? 'rgba(215,105,60,0.9)' : 'rgba(255,255,255,0.3)' }}
+                  style={{ color: hovered === 'register' ? 'rgba(215,105,60,0.9)' : 'rgba(255,255,255,0.4)' }}
                 >
                   ENTER →
                 </span>
@@ -413,17 +448,22 @@ export default function Home() {
             href="/materials"
             className="relative flex flex-col items-end justify-center overflow-hidden"
             style={{
-              cursor: 'none',
-              flex: hovered === 'explore' ? '0 0 64%' : hovered === 'register' ? '0 0 36%' : '1 1 0%',
-              transition: 'flex 0.65s cubic-bezier(0.16,1,0.3,1)',
+              cursor: isMobile ? 'pointer' : 'none',
+              ...(isMobile
+                ? { width: '100%', height: '50%', flex: 'none' }
+                : {
+                    flex: hovered === 'explore' ? '0 0 64%' : hovered === 'register' ? '0 0 36%' : '1 1 0%',
+                    transition: 'flex 0.65s cubic-bezier(0.16,1,0.3,1)',
+                  }
+              ),
               minWidth: 0,
               paddingRight: 'clamp(28px, 7vw, 80px)',
               paddingLeft: 'clamp(20px, 4vw, 52px)',
               paddingTop: '20px',
-              paddingBottom: '20px',
+              paddingBottom: isMobile ? '32px' : '20px',
             }}
-            onMouseEnter={() => setHovered('explore')}
-            onMouseLeave={() => setHovered(null)}
+            onMouseEnter={() => !isMobile && setHovered('explore')}
+            onMouseLeave={() => !isMobile && setHovered(null)}
           >
             {(['tl', 'tr', 'bl', 'br'] as const).map(pos => (
               <Corner
@@ -443,7 +483,7 @@ export default function Home() {
             >
               <p
                 className="mb-3 text-[8px] tracking-[0.55em]"
-                style={{ color: hovered === 'explore' ? 'rgba(165,155,230,1)' : 'rgba(255,255,255,0.38)' }}
+                style={{ color: hovered === 'explore' ? 'rgba(165,155,230,1)' : 'rgba(255,255,255,0.5)' }}
               >
                 FOR CREATORS
               </p>
@@ -456,7 +496,7 @@ export default function Home() {
               <p
                 className="mt-4 text-sm leading-7"
                 style={{
-                  color: hovered === 'explore' ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.32)',
+                  color: hovered === 'explore' ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.6)',
                   maxWidth: '18em',
                   transition: 'color 0.4s ease',
                 }}
@@ -466,7 +506,7 @@ export default function Home() {
               <div className="mt-6 flex items-center justify-end gap-3">
                 <span
                   className="text-[8px] tracking-[0.45em]"
-                  style={{ color: hovered === 'explore' ? 'rgba(165,155,230,0.9)' : 'rgba(255,255,255,0.3)' }}
+                  style={{ color: hovered === 'explore' ? 'rgba(165,155,230,0.9)' : 'rgba(255,255,255,0.4)' }}
                 >
                   ← ENTER
                 </span>
@@ -483,34 +523,38 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* Custom cursor */}
-        <div
-          className="pointer-events-none fixed z-[100] rounded-full"
-          style={{
-            left: `${mouse.x * 100}%`,
-            top: `${mouse.y * 100}%`,
-            width: '4px', height: '4px',
-            transform: 'translate(-50%,-50%)',
-            backgroundColor: 'white',
-          }}
-        />
-        <div
-          className="pointer-events-none fixed z-[99] rounded-full border"
-          style={{
-            left: `${smoothMouse.x * 100}%`,
-            top: `${smoothMouse.y * 100}%`,
-            width: hovered ? '62px' : '26px',
-            height: hovered ? '62px' : '26px',
-            transform: 'translate(-50%,-50%)',
-            borderColor:
-              hovered === 'register' ? warmColor
-                : hovered === 'explore' ? coolColor
-                  : 'rgba(255,255,255,0.2)',
-            mixBlendMode: 'difference',
-            transition:
-              'width 0.44s cubic-bezier(0.16,1,0.3,1), height 0.44s cubic-bezier(0.16,1,0.3,1), border-color 0.3s ease',
-          }}
-        />
+        {/* Custom cursor - desktop only */}
+        {!isMobile && (
+          <>
+            <div
+              className="pointer-events-none fixed z-[100] rounded-full"
+              style={{
+                left: `${mouse.x * 100}%`,
+                top: `${mouse.y * 100}%`,
+                width: '4px', height: '4px',
+                transform: 'translate(-50%,-50%)',
+                backgroundColor: 'white',
+              }}
+            />
+            <div
+              className="pointer-events-none fixed z-[99] rounded-full border"
+              style={{
+                left: `${smoothMouse.x * 100}%`,
+                top: `${smoothMouse.y * 100}%`,
+                width: hovered ? '62px' : '26px',
+                height: hovered ? '62px' : '26px',
+                transform: 'translate(-50%,-50%)',
+                borderColor:
+                  hovered === 'register' ? warmColor
+                    : hovered === 'explore' ? coolColor
+                      : 'rgba(255,255,255,0.2)',
+                mixBlendMode: 'difference',
+                transition:
+                  'width 0.44s cubic-bezier(0.16,1,0.3,1), height 0.44s cubic-bezier(0.16,1,0.3,1), border-color 0.3s ease',
+              }}
+            />
+          </>
+        )}
 
         {/* Footer */}
         <div
