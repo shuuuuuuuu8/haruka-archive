@@ -441,10 +441,15 @@ export default function Home() {
                 </span>
               </div>
               <p
-                className="mt-2 text-[7px]"
-                style={{ color: 'rgba(255,255,255,0.18)', letterSpacing: '0.05em' }}
+                className="mt-3 text-[10px] leading-relaxed"
+                style={{
+                  color: hovered === 'register' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.32)',
+                  letterSpacing: '0.04em',
+                  transition: 'color 0.4s ease',
+                }}
               >
-                ※ musubi-sozai.vercel.app（公式登録システム）へ移動します
+                結 素材バンクが運営する公式の登録システム<br />
+                （musubi-sozai.vercel.app）へ移動します
               </p>
             </div>
           </a>
