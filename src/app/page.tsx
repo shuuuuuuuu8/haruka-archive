@@ -406,7 +406,7 @@ export default function Home() {
                 className="mb-3 text-[8px] tracking-[0.55em]"
                 style={{ color: hovered === 'register' ? 'rgba(215,105,60,1)' : 'rgba(255,255,255,0.5)' }}
               >
-                FOR SUPPLIERS
+                素材をお持ちの方へ
               </p>
               <p
                 className="font-serif font-medium text-white"
@@ -437,9 +437,15 @@ export default function Home() {
                   className="text-[8px] tracking-[0.45em]"
                   style={{ color: hovered === 'register' ? 'rgba(215,105,60,0.9)' : 'rgba(255,255,255,0.4)' }}
                 >
-                  ENTER →
+                  登録ページへ進む →
                 </span>
               </div>
+              <p
+                className="mt-2 text-[7px]"
+                style={{ color: 'rgba(255,255,255,0.18)', letterSpacing: '0.05em' }}
+              >
+                ※ musubi-sozai.vercel.app（公式登録システム）へ移動します
+              </p>
             </div>
           </a>
 
@@ -485,7 +491,7 @@ export default function Home() {
                 className="mb-3 text-[8px] tracking-[0.55em]"
                 style={{ color: hovered === 'explore' ? 'rgba(165,155,230,1)' : 'rgba(255,255,255,0.5)' }}
               >
-                FOR CREATORS
+                素材を探している方へ
               </p>
               <p
                 className="font-serif font-medium text-white"
@@ -508,7 +514,7 @@ export default function Home() {
                   className="text-[8px] tracking-[0.45em]"
                   style={{ color: hovered === 'explore' ? 'rgba(165,155,230,0.9)' : 'rgba(255,255,255,0.4)' }}
                 >
-                  ← ENTER
+                  ← 素材を探す
                 </span>
                 <div
                   style={{
