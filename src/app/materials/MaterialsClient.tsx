@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Fuse from 'fuse.js'
-import { ChevronDown, ClipboardCheck, LayoutGrid, List, MessageSquare, Search, SlidersHorizontal, X } from 'lucide-react'
+import { ArrowLeft, ChevronDown, ClipboardCheck, LayoutGrid, Layers, List, MessageSquare, Search, SlidersHorizontal, X } from 'lucide-react'
 import FilterSidebar from '@/components/materials/FilterSidebar'
 import MaterialCard from '@/components/materials/MaterialCard'
 import type { ColorGroup, Material, MaterialCategory, MaterialFilters } from '@/types/material'
@@ -11,6 +11,20 @@ const QUICK_CATEGORIES: MaterialCategory[] = ['厚手シルク', '薄手シル�
 const QUICK_MATERIAL_TYPES = ['絹', 'ポリエステル']
 const QUICK_COLORS: ColorGroup[] = ['白系', '黒系', '藍系', '赤系', '金系', '緑系', '多色']
 const SEARCH_FLOW = ['素材を探す', '候補を比較する', 'サンプル・ロットを相談する']
+
+// カテゴリー選択画面の表示順と短い説明
+const CATEGORY_ORDER: MaterialCategory[] = ['厚手シルク', '薄手シルク', '絹', '綿', '麻', '和紙', '古布', '工芸素材', 'その他']
+const CATEGORY_DESC: Record<MaterialCategory, string> = {
+  厚手シルク: '帯地・重めの絹地',
+  薄手シルク: '反物・羽二重など',
+  絹: '正絹の素材',
+  綿: '木綿の素材',
+  麻: '麻の素材',
+  和紙: '和紙・紙素材',
+  古布: 'アンティーク・古布',
+  工芸素材: '工芸・装飾の素材',
+  その他: 'その他の素材',
+}
 
 function toggle<T>(arr: T[] | undefined, val: T): T[] {
   const current = arr ?? []
@@ -40,16 +54,56 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [sortMode, setSortMode] = useState<'newest' | 'id' | 'category'>('newest')
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+  // カテゴリー選択画面 → 一覧 の2段階。最初はカテゴリー選択を表示する。
+  const [entered, setEntered] = useState(false)
   const hasFilters = Object.values(filters).some((value) => value !== undefined && (!Array.isArray(value) || value.length > 0))
 
   useEffect(() => {
     const category = new URLSearchParams(window.location.search).get('category')
     const categories = new Set(initialMaterials.map((material) => material.category))
 
+    // ?category= 付きで来た場合は、その種類で絞り込んで一覧へ直行する
     if (category && categories.has(category as MaterialCategory)) {
       setFilters((current) => ({ ...current, category: [category as MaterialCategory] }))
+      setEntered(true)
     }
   }, [initialMaterials])
+
+  // データに実在するカテゴリーだけを、代表画像・点数付きで集計する
+  const categoryGroups = useMemo(() => {
+    const map = new Map<MaterialCategory, { count: number; image: string }>()
+    for (const material of initialMaterials) {
+      const current = map.get(material.category)
+      if (current) current.count += 1
+      else map.set(material.category, { count: 1, image: material.images[0] })
+    }
+    return CATEGORY_ORDER.filter((category) => map.has(category)).map((category) => ({
+      category,
+      count: map.get(category)!.count,
+      image: map.get(category)!.image,
+    }))
+  }, [initialMaterials])
+
+  function enterCategory(category: MaterialCategory) {
+    setQuery('')
+    setFilters({ category: [category] })
+    setEntered(true)
+    window.scrollTo({ top: 0 })
+  }
+
+  function enterAll() {
+    setQuery('')
+    setFilters({})
+    setEntered(true)
+    window.scrollTo({ top: 0 })
+  }
+
+  function backToCategories() {
+    setQuery('')
+    setFilters({})
+    setEntered(false)
+    window.scrollTo({ top: 0 })
+  }
 
   const fuse = useMemo(
     () =>
@@ -83,6 +137,61 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
     })
   }, [filters, fuse, initialMaterials, query, sortMode])
 
+  // ── カテゴリー選択画面（最初に表示） ──────────────────
+  if (!entered) {
+    return (
+      <main style={{ backgroundColor: '#fbfaf7' }}>
+        <section className="px-4 pb-10 pt-24 sm:px-6" style={{ backgroundColor: '#fffefa' }}>
+          <div className="mx-auto max-w-5xl text-center">
+            <p className="mb-2 text-xs tracking-[0.24em]" style={{ color: 'var(--accent)' }}>
+              MATERIAL ARCHIVE
+            </p>
+            <h1 className="font-serif text-3xl font-medium sm:text-4xl">種類から探す</h1>
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-7" style={{ color: 'var(--text-muted)' }}>
+              お探しの素材の種類をお選びください。次の画面で、色や用途などからさらに絞り込めます。
+            </p>
+          </div>
+
+          <div className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
+            {categoryGroups.map(({ category, count, image }) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => enterCategory(category)}
+                className="group relative aspect-[4/3] overflow-hidden border text-left transition-transform hover:-translate-y-0.5"
+                style={{ borderColor: 'var(--border)' }}
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                  style={{ backgroundImage: `url(${image})` }}
+                />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.05) 100%)' }} />
+                <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4 text-white">
+                  <p className="font-serif text-lg font-medium sm:text-xl">{category}</p>
+                  <p className="mt-0.5 text-[11px] opacity-80">{CATEGORY_DESC[category]}</p>
+                  <p className="mt-1 text-[11px] tracking-[0.1em] opacity-90">{count}点</p>
+                </div>
+              </button>
+            ))}
+
+            {/* すべて見る */}
+            <button
+              type="button"
+              onClick={enterAll}
+              className="group flex aspect-[4/3] flex-col items-center justify-center gap-2 border text-center transition-colors hover:bg-white"
+              style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}
+            >
+              <Layers size={26} style={{ color: 'var(--accent)' }} />
+              <p className="font-serif text-lg font-medium" style={{ color: 'var(--text)' }}>すべての素材</p>
+              <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{initialMaterials.length}点を一覧で見る</p>
+            </button>
+          </div>
+        </section>
+      </main>
+    )
+  }
+
+  // ── 素材一覧 ───────────────────────────────────────
   return (
     <main style={{ backgroundColor: '#fbfaf7' }}>
       {/* 素材登録CTA */}
@@ -108,6 +217,15 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
             <div>
+              <button
+                type="button"
+                onClick={backToCategories}
+                className="mb-3 inline-flex items-center gap-1.5 text-xs transition-opacity hover:opacity-70"
+                style={{ color: 'var(--accent)' }}
+              >
+                <ArrowLeft size={14} />
+                種類を選びなおす
+              </button>
               <p className="mb-2 text-xs tracking-[0.24em]" style={{ color: 'var(--accent)' }}>
                 MATERIAL ARCHIVE
               </p>
