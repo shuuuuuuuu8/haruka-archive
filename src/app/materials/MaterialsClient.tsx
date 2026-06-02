@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Fuse from 'fuse.js'
-import { ArrowLeft, ChevronDown, ClipboardCheck, LayoutGrid, Layers, List, MessageSquare, Search, SlidersHorizontal, X } from 'lucide-react'
+import { ArrowLeft, ChevronDown, ClipboardCheck, LayoutGrid, Layers, List, MessageSquare, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react'
 import FilterSidebar from '@/components/materials/FilterSidebar'
 import MaterialCard from '@/components/materials/MaterialCard'
+import MaterialChat from '@/components/materials/MaterialChat'
 import type { ColorGroup, Material, MaterialCategory, MaterialFilters } from '@/types/material'
 
 const QUICK_CATEGORIES: MaterialCategory[] = ['着物', '帯', '反物']
@@ -27,6 +28,25 @@ const CATEGORY_DESC: Partial<Record<MaterialCategory, string>> = {
 function toggle<T>(arr: T[] | undefined, val: T): T[] {
   const current = arr ?? []
   return current.includes(val) ? current.filter((item) => item !== val) : [...current, val]
+}
+
+// AI相談のフローティングボタン＋チャット本体（カテゴリ画面・一覧の両方に表示）
+function ChatLauncher({ materials, open, onOpen, onClose }: { materials: Material[]; open: boolean; onOpen: () => void; onClose: () => void }) {
+  return (
+    <>
+      <button
+        type="button"
+        onClick={onOpen}
+        className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full px-4 py-3 text-sm font-medium text-white shadow-lg transition-transform hover:-translate-y-0.5"
+        style={{ backgroundColor: 'var(--accent)' }}
+        aria-label="AIに相談して探す"
+      >
+        <Sparkles size={18} />
+        <span className="hidden sm:inline">AIに相談</span>
+      </button>
+      <MaterialChat materials={materials} open={open} onClose={onClose} />
+    </>
+  )
 }
 
 function QuickChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
@@ -52,6 +72,7 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [sortMode, setSortMode] = useState<'newest' | 'id' | 'category'>('newest')
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false)
   // カテゴリー選択画面 → 一覧 の2段階。最初はカテゴリー選択を表示する。
   const [entered, setEntered] = useState(false)
   const hasFilters = Object.values(filters).some((value) => value !== undefined && (!Array.isArray(value) || value.length > 0))
@@ -148,6 +169,17 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
             <p className="mx-auto mt-4 max-w-xl text-sm leading-7" style={{ color: 'var(--text-muted)' }}>
               お探しの素材の種類をお選びください。次の画面で、色や用途などからさらに絞り込めます。
             </p>
+            <div className="mt-6 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setChatOpen(true)}
+                className="inline-flex items-center gap-2 border px-5 py-2.5 text-sm transition-colors hover:bg-white"
+                style={{ borderColor: 'var(--accent)', color: 'var(--accent)', backgroundColor: 'var(--bg-card)' }}
+              >
+                <Sparkles size={16} />
+                AIに相談して探す
+              </button>
+            </div>
           </div>
 
           <div className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
@@ -185,6 +217,8 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
             </button>
           </div>
         </section>
+
+        <ChatLauncher materials={initialMaterials} open={chatOpen} onOpen={() => setChatOpen(true)} onClose={() => setChatOpen(false)} />
       </main>
     )
   }
@@ -354,6 +388,8 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
           </section>
         </div>
       </div>
+
+      <ChatLauncher materials={initialMaterials} open={chatOpen} onOpen={() => setChatOpen(true)} onClose={() => setChatOpen(false)} />
     </main>
   )
 }
