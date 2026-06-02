@@ -3,7 +3,8 @@ import OpenAI from 'openai'
 import { getAllMaterials } from '@/lib/get-materials'
 import type { Material } from '@/types/material'
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+// このルートは動的（ビルド時に事前評価しない）
+export const dynamic = 'force-dynamic'
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string }
 
@@ -62,6 +63,16 @@ export async function POST(req: NextRequest) {
   if (!Array.isArray(messages) || messages.length === 0) {
     return NextResponse.json({ error: 'メッセージがありません' }, { status: 400 })
   }
+
+  // APIキーが無い場合は実行時に丁寧なエラーを返す（ビルドはクラッシュさせない）
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: 'AI相談は現在準備中です。お手数ですが直接ご相談ください。' },
+      { status: 503 }
+    )
+  }
+  const openai = new OpenAI({ apiKey })
 
   // 会話履歴をサーバ側で軽く制限（直近12件）
   const history = messages
