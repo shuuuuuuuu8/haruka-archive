@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, ExternalLink, MapPin, Package } from 'lucide-react'
-import { MATERIALS, PARTNERS } from '@/lib/data'
+import { PARTNERS } from '@/lib/data'
 
 export const metadata: Metadata = {
   title: '素材提供元',
@@ -28,21 +28,13 @@ export default function PartnersPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-        <div className="mb-8 grid gap-4 border-y py-4 sm:grid-cols-3" style={{ borderColor: 'var(--border)' }}>
+        <div className="mb-8 grid gap-4 border-y py-4 sm:grid-cols-2" style={{ borderColor: 'var(--border)' }}>
           <p>
             <span className="font-serif text-3xl" style={{ color: 'var(--accent)' }}>
               {PARTNERS.length}
             </span>
             <span className="ml-2 text-xs" style={{ color: 'var(--text-muted)' }}>
               提供元
-            </span>
-          </p>
-          <p>
-            <span className="font-serif text-3xl" style={{ color: 'var(--accent)' }}>
-              {MATERIALS.length}
-            </span>
-            <span className="ml-2 text-xs" style={{ color: 'var(--text-muted)' }}>
-              登録素材
             </span>
           </p>
           <p className="self-center text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -52,7 +44,6 @@ export default function PartnersPage() {
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {PARTNERS.map((partner) => {
-            const partnerMaterials = MATERIALS.filter((material) => material.supplier === partner.name)
             return (
               <article key={partner.id} className="flex flex-col border" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
                 <div className="border-b p-5" style={{ borderColor: 'var(--border)' }}>
@@ -76,24 +67,19 @@ export default function PartnersPage() {
                   <p className="text-sm leading-7" style={{ color: 'var(--text-muted)' }}>
                     {partner.story}
                   </p>
-                  {partnerMaterials.length > 0 && (
-                    <p className="mt-auto border-t pt-4 text-xs" style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
-                      登録素材 {partnerMaterials.length}件
-                    </p>
-                  )}
                   {partner.websiteUrl ? (
                     <a
                       href={partner.websiteUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-2 inline-flex items-center justify-between border px-3 py-2 text-xs"
+                      className="mt-auto inline-flex items-center justify-between border px-3 py-2 text-xs"
                       style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}
                     >
                       丸屋の詳細を見る
                       <ExternalLink size={13} />
                     </a>
                   ) : (
-                    <Link href="/inquiry" className="mt-2 inline-flex items-center justify-between border px-3 py-2 text-xs" style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}>
+                    <Link href="/inquiry" className="mt-auto inline-flex items-center justify-between border px-3 py-2 text-xs" style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}>
                       この提供元について相談する
                       <ArrowRight size={13} />
                     </Link>
