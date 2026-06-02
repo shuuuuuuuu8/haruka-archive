@@ -7,22 +7,20 @@ import FilterSidebar from '@/components/materials/FilterSidebar'
 import MaterialCard from '@/components/materials/MaterialCard'
 import type { ColorGroup, Material, MaterialCategory, MaterialFilters } from '@/types/material'
 
-const QUICK_CATEGORIES: MaterialCategory[] = ['厚手シルク', '薄手シルク']
+const QUICK_CATEGORIES: MaterialCategory[] = ['着物', '帯', '反物']
 const QUICK_MATERIAL_TYPES = ['絹', 'ポリエステル']
 const QUICK_COLORS: ColorGroup[] = ['白系', '黒系', '藍系', '赤系', '金系', '緑系', '多色']
 const SEARCH_FLOW = ['素材を探す', '候補を比較する', 'サンプル・ロットを相談する']
 
-// カテゴリー選択画面の表示順と短い説明
-const CATEGORY_ORDER: MaterialCategory[] = ['厚手シルク', '薄手シルク', '絹', '綿', '麻', '和紙', '古布', '工芸素材', 'その他']
-const CATEGORY_DESC: Record<MaterialCategory, string> = {
-  厚手シルク: '帯地・重めの絹地',
-  薄手シルク: '反物・羽二重など',
-  絹: '正絹の素材',
-  綿: '木綿の素材',
-  麻: '麻の素材',
-  和紙: '和紙・紙素材',
-  古布: 'アンティーク・古布',
-  工芸素材: '工芸・装飾の素材',
+// カテゴリー選択画面の表示順（登録時の種類）と短い説明
+const CATEGORY_ORDER: MaterialCategory[] = ['着物', '帯', '反物', '羽織', '袴', '小物', 'その他']
+const CATEGORY_DESC: Partial<Record<MaterialCategory, string>> = {
+  着物: '着物・きもの',
+  帯: '帯・帯地',
+  反物: '反物・生地',
+  羽織: '羽織もの',
+  袴: '袴',
+  小物: '小物・装飾品',
   その他: 'その他の素材',
 }
 

@@ -9,26 +9,16 @@ import type {
 } from '@/types/material'
 import { musubiSupabase, getMusubiImageUrl } from './musubi-supabase'
 
-// カテゴリマッピング（musubi → haruka）
-const CATEGORY_MAP: Record<string, MaterialCategory> = {
-  kimono: '厚手シルク',
-  obi: '厚手シルク',
-  tanmono: '薄手シルク',
-  haori: '厚手シルク',
-  hakama: '厚手シルク',
-  accessories: '工芸素材',
+// カテゴリマッピング（musubi登録カテゴリ → 表示カテゴリー）
+// 登録時に選んだ種類をそのままカテゴリーとして使う。
+const ITEM_CATEGORY_MAP: Record<string, MaterialCategory> = {
+  kimono: '着物',
+  obi: '帯',
+  tanmono: '反物',
+  haori: '羽織',
+  hakama: '袴',
+  accessories: '小物',
   other: 'その他',
-}
-
-// 生地タイプマッピング
-const FABRIC_MAP: Record<string, MaterialCategory> = {
-  silk: '厚手シルク',
-  cotton: '綿',
-  linen: '麻',
-  wool: '工芸素材',
-  synthetic: 'その他',
-  mixed: 'その他',
-  unknown: 'その他',
 }
 
 const categoryLabels: Record<string, string> = {
@@ -130,8 +120,8 @@ export async function fetchMusubiMaterials(): Promise<Material[]> {
           ? images.map((img) => getMusubiImageUrl(img.storage_path))
           : ['/placeholder-material.jpg']
 
-      // カテゴリ: fabric_type優先、次にcategory
-      const category = FABRIC_MAP[m.fabric_type] ?? CATEGORY_MAP[m.category] ?? 'その他'
+      // カテゴリ: 登録時に選んだ種類（着物・帯・反物 等）を使う
+      const category = ITEM_CATEGORY_MAP[m.category] ?? 'その他'
 
       const COLOR_GROUP_VALUES: ColorGroup[] = ['白系', '黒系', '藍系', '赤系', '金系', '茶系', '緑系', '多色', 'その他']
       const colorGroup: ColorGroup = (COLOR_GROUP_VALUES.includes(m.color as ColorGroup) ? m.color : 'その他') as ColorGroup
