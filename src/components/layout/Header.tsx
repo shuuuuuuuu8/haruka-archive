@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
-import { Menu, Search, X } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { LogOut, Menu, Search, UserRound, X } from 'lucide-react'
+import { createBuyerClient } from '@/lib/buyer/client'
 
 const NAV = [
   { href: '/materials', label: '素材を探す' },
@@ -15,7 +16,9 @@ const NAV = [
 export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [buyerName, setBuyerName] = useState<string | null>(null)
   const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 32)
@@ -24,6 +27,26 @@ export default function Header() {
   }, [])
 
   useEffect(() => setMobileOpen(false), [pathname])
+
+  // 買い手のログイン状態を取得（MUSUBI Supabase）
+  useEffect(() => {
+    const supabase = createBuyerClient()
+    const read = (user: { user_metadata?: Record<string, unknown>; email?: string } | null) => {
+      if (!user) { setBuyerName(null); return }
+      const meta = user.user_metadata ?? {}
+      setBuyerName((meta.display_name as string) ?? user.email?.split('@')[0] ?? 'アカウント')
+    }
+    supabase.auth.getUser().then(({ data }) => read(data.user))
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => read(session?.user ?? null))
+    return () => sub.subscription.unsubscribe()
+  }, [])
+
+  async function handleLogout() {
+    const supabase = createBuyerClient()
+    await supabase.auth.signOut()
+    setBuyerName(null)
+    router.refresh()
+  }
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
   const isHome = pathname === '/'
@@ -73,14 +96,42 @@ export default function Header() {
           ))}
         </nav>
 
-        <Link
-          href="/materials"
-          className="hidden items-center gap-2 px-4 py-2 text-xs tracking-[0.14em] text-white md:flex transition-colors"
-          style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'var(--accent)', transition: 'background-color 0.4s ease' }}
-        >
-          <Search size={14} />
-          検索
-        </Link>
+        <div className="hidden items-center gap-3 md:flex">
+          <Link
+            href="/materials"
+            className="flex items-center gap-2 px-4 py-2 text-xs tracking-[0.14em] text-white transition-colors"
+            style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'var(--accent)', transition: 'background-color 0.4s ease' }}
+          >
+            <Search size={14} />
+            検索
+          </Link>
+
+          {buyerName ? (
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5 text-xs" style={{ color: dark ? 'rgba(255,255,255,0.8)' : 'var(--text)' }}>
+                <UserRound size={14} />
+                {buyerName}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1 text-xs transition-opacity hover:opacity-70"
+                style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'var(--text-muted)' }}
+                aria-label="ログアウト"
+              >
+                <LogOut size={13} />
+                ログアウト
+              </button>
+            </div>
+          ) : (
+            <Link
+              href={`/account/login?next=${encodeURIComponent(pathname)}`}
+              className="text-xs tracking-[0.14em] transition-opacity hover:opacity-70"
+              style={{ color: dark ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)' }}
+            >
+              ログイン
+            </Link>
+          )}
+        </div>
 
         <button
           className="p-2 md:hidden"
@@ -115,6 +166,26 @@ export default function Header() {
                 {label}
               </Link>
             ))}
+            {buyerName ? (
+              <div className="flex items-center justify-between py-3">
+                <span className="flex items-center gap-1.5 text-sm" style={{ color: dark ? 'rgba(255,255,255,0.85)' : 'var(--text)' }}>
+                  <UserRound size={15} />
+                  {buyerName}
+                </span>
+                <button onClick={handleLogout} className="flex items-center gap-1 text-xs" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'var(--text-muted)' }}>
+                  <LogOut size={13} />
+                  ログアウト
+                </button>
+              </div>
+            ) : (
+              <Link
+                href={`/account/login?next=${encodeURIComponent(pathname)}`}
+                className="py-3 text-sm"
+                style={{ color: dark ? 'rgba(255,255,255,0.85)' : 'var(--accent)' }}
+              >
+                ログイン / 新規登録
+              </Link>
+            )}
           </div>
         </div>
       )}
