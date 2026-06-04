@@ -36,6 +36,8 @@ export default function MaterialChat({
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  // IME（日本語変換）中かどうか。変換確定のEnterで誤送信しないために使う。
+  const composingRef = useRef(false)
 
   const byId = useMemo(() => {
     const map = new Map<string, Material>()
@@ -244,6 +246,8 @@ export default function MaterialChat({
           <form
             onSubmit={(e) => {
               e.preventDefault()
+              // 変換確定中は送信しない
+              if (composingRef.current) return
               send(input)
             }}
             className="flex shrink-0 items-center gap-2 border-t p-3"
@@ -252,6 +256,15 @@ export default function MaterialChat({
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onCompositionStart={() => { composingRef.current = true }}
+              onCompositionEnd={() => { composingRef.current = false }}
+              onKeyDown={(e) => {
+                if (e.key !== 'Enter') return
+                // 日本語変換中のEnterは「確定」。送信せずIMEに任せる。
+                if (e.nativeEvent.isComposing || composingRef.current) return
+                e.preventDefault()
+                send(input)
+              }}
               placeholder="作りたいものや好みを入力…"
               className="min-w-0 flex-1 border bg-white px-3 py-2.5 text-sm outline-none"
               style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
