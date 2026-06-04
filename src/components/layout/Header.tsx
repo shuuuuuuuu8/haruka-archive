@@ -107,7 +107,14 @@ export default function Header() {
           </Link>
 
           {buyerName ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <Link
+                href="/account/chats"
+                className="text-xs transition-opacity hover:opacity-70"
+                style={{ color: dark ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)' }}
+              >
+                相談一覧
+              </Link>
               <span className="flex items-center gap-1.5 text-xs" style={{ color: dark ? 'rgba(255,255,255,0.8)' : 'var(--text)' }}>
                 <UserRound size={14} />
                 {buyerName}

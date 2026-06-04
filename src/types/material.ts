@@ -38,6 +38,8 @@ export type RecommendedUse =
 
 export interface Material {
   id: string
+  /** 素材バンク(MUSUBI)の本物のUUID。会話・取引の作成に使う（静的データは無し）。 */
+  sourceId?: string
   name: string
   nameEn?: string
   category: MaterialCategory

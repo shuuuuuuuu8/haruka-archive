@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, MessageSquare } from 'lucide-react'
 import { StatusBadge, VerifiedBadge } from '@/components/ui/StatusBadge'
+import { ContactButton } from '@/components/materials/ContactButton'
 import { getAllMaterials } from '@/lib/get-materials'
 import { QUANTITY_SIZE_LABELS } from '@/types/material'
 
@@ -163,14 +164,18 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
               <p className="text-[10px] tracking-[0.2em]" style={{ color: 'var(--text-muted)' }}>
                 NEXT STEP
               </p>
-              <h2 className="mt-2 font-serif text-xl">この素材を候補に入れて相談する</h2>
+              <h2 className="mt-2 font-serif text-xl">この素材について相談する</h2>
               <p className="mt-3 text-sm leading-7" style={{ color: 'var(--text-muted)' }}>
-                このサイトでは直接購入できません。用途、希望数量、サンプル確認、価格相談、商品開発の内容を遙へ共有してください。遙が素材を保有する老舗・工房との間に入り、確認と調整を進めます。
+                提供元と直接チャットで、用途・希望数量・サンプル確認・価格などを相談できます。遙が間に入り、確認と調整をサポートします。相談の開始にはログイン（無料）が必要です。
               </p>
-              <Link href="/inquiry" className="mt-5 inline-flex items-center justify-center gap-2 px-6 py-3 text-sm tracking-[0.14em] text-white" style={{ backgroundColor: 'var(--accent)' }}>
-                <MessageSquare size={16} />
-                サンプル・ロットについて相談する
-              </Link>
+              {material.sourceId ? (
+                <ContactButton materialUuid={material.sourceId} backTo={`/materials/${material.id}`} />
+              ) : (
+                <Link href="/inquiry" className="mt-5 inline-flex items-center justify-center gap-2 px-6 py-3 text-sm tracking-[0.14em] text-white" style={{ backgroundColor: 'var(--accent)' }}>
+                  <MessageSquare size={16} />
+                  相談する
+                </Link>
+              )}
             </div>
           </section>
         </div>

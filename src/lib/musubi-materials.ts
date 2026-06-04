@@ -128,6 +128,7 @@ export async function fetchMusubiMaterials(): Promise<Material[]> {
 
       const material: Material = {
         id: `MSB-${m.id.slice(0, 8).toUpperCase()}`,
+        sourceId: m.id,
         name: m.name,
         category,
         materialType: fabricLabels[m.fabric_type] ?? '不明',
