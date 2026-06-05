@@ -15,14 +15,28 @@ export async function startConversation(materialUuid: string, backTo: string) {
     redirect(`/account/login?next=${encodeURIComponent(backTo)}`)
   }
 
-  // 買い手プロフィール
-  const { data: buyer } = await supabase
+  // 買い手プロフィール（無ければ自己修復で作成）
+  let { data: buyer } = await supabase
     .from('buyer_profiles')
     .select('id')
     .eq('user_id', user.id)
     .maybeSingle()
+
   if (!buyer) {
-    // 提供元アカウント等で buyer_profiles が無い場合
+    const displayName =
+      (user.user_metadata?.display_name as string | undefined) ??
+      user.email?.split('@')[0] ??
+      'ゲスト'
+    const { data: created } = await supabase
+      .from('buyer_profiles')
+      .upsert({ user_id: user.id, display_name: displayName }, { onConflict: 'user_id' })
+      .select('id')
+      .single()
+    buyer = created
+  }
+
+  if (!buyer) {
+    // それでも作成できない場合のみログインへ
     redirect(`/account/login?next=${encodeURIComponent(backTo)}`)
   }
 
