@@ -84,6 +84,13 @@ export function AuthForm({ mode, next }: { mode: 'login' | 'signup'; next: strin
       </Field>
 
       <Field label="パスワード" hint={mode === 'signup' ? '半角の英字と数字で8文字以上' : undefined}>
+        {mode === 'login' && (
+          <div className="-mt-1 mb-1 text-right">
+            <Link href="/account/forgot-password" className="text-[11px] underline" style={{ color: 'var(--accent)' }}>
+              パスワードをお忘れの方
+            </Link>
+          </div>
+        )}
         <div className="relative">
           <input
             name="password"
