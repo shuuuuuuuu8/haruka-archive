@@ -116,7 +116,16 @@ export function AuthForm({ mode, next }: { mode: 'login' | 'signup'; next: strin
       {mode === 'login' ? (
         <SubmitButton label="ログイン" pendingLabel="ログイン中..." />
       ) : (
-        <SubmitButton label="登録する" pendingLabel="登録中..." />
+        <>
+          <p className="text-[11px] leading-5" style={{ color: 'var(--text-muted)' }}>
+            登録することで、
+            <Link href="/legal/terms" className="underline" style={{ color: 'var(--accent)' }}>利用規約</Link>
+            と
+            <Link href="/legal/privacy" className="underline" style={{ color: 'var(--accent)' }}>プライバシーポリシー</Link>
+            に同意したものとみなします。
+          </p>
+          <SubmitButton label="登録する" pendingLabel="登録中..." />
+        </>
       )}
 
       <p className="pt-1 text-center text-xs" style={{ color: 'var(--text-muted)' }}>

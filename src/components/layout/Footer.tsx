@@ -22,12 +22,20 @@ export default function Footer() {
         </div>
         <div>
           <p className="mb-3 text-[11px] tracking-[0.2em]" style={{ color: 'var(--text-muted)' }}>
-            NOTE
+            INFO
           </p>
-          <p className="text-xs leading-7" style={{ color: 'var(--text-muted)' }}>
-            このサイトはECではありません。サンプル確認、ロット相談、価格相談、商品開発、共創企画は遙が間に入り調整します。
+          <div className="flex flex-col gap-2 text-sm">
+            <Link href="/legal/terms">利用規約</Link>
+            <Link href="/legal/privacy">プライバシーポリシー</Link>
+          </div>
+          <p className="mt-4 text-xs leading-6" style={{ color: 'var(--text-muted)' }}>
+            運営: 合同会社遙<br />
+            東京都中央区銀座一丁目12番4号 N&amp;E BLD. 6F
           </p>
         </div>
+      </div>
+      <div className="border-t px-4 py-4 text-center text-[11px] sm:px-6" style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
+        このサイトはECではありません。成約・お金のやり取りは遙が間に入り調整します。 © 2026 結 素材バンク
       </div>
     </footer>
   )
