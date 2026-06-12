@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createBuyerServerClient } from '@/lib/buyer/server'
+import { ensureBuyerProfile } from '@/lib/buyer/auth'
 
 export type AuthState = {
   error?: string
@@ -88,7 +89,19 @@ export async function buyerLoginAction(
   })
   if (error) return { error: jaError(error.message), fields: { email } }
 
+  // 注意: ここ（ログイン直後のアクション内）はまだ anon ロールで DB クエリが走るため、
+  // 買い手プロフィールの用意は Header→ensureBuyerProfileAction（認証済みリクエスト）で行う。
   redirect(next)
+}
+
+// 買い手プロフィールが無ければ作る（Header から呼ぶ＝認証済みリクエストで確実に動く）。
+// 提供元として作ったアカウントでも、買い手サイトを開けば買い手プロフィールが用意される。
+export async function ensureBuyerProfileAction(): Promise<void> {
+  const supabase = await createBuyerServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (user) await ensureBuyerProfile(supabase, user)
 }
 
 export async function buyerLogoutAction() {

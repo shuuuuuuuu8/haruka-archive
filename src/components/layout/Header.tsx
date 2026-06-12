@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { LogOut, Menu, Search, UserRound, X } from 'lucide-react'
 import { createBuyerClient } from '@/lib/buyer/client'
+import { ensureBuyerProfileAction } from '@/app/account/actions'
 
 const NAV = [
   { href: '/materials', label: '素材を探す' },
@@ -36,7 +37,11 @@ export default function Header() {
       const meta = user.user_metadata ?? {}
       setBuyerName((meta.display_name as string) ?? user.email?.split('@')[0] ?? 'アカウント')
     }
-    supabase.auth.getUser().then(({ data }) => read(data.user))
+    supabase.auth.getUser().then(({ data }) => {
+      read(data.user)
+      // 買い手プロフィールを自己修復（認証済みサーバーアクション経由＝確実に動く）
+      if (data.user) ensureBuyerProfileAction().catch(() => {})
+    })
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => read(session?.user ?? null))
     return () => sub.subscription.unsubscribe()
   }, [])
