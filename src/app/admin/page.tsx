@@ -34,6 +34,16 @@ type DealRow = {
   supplier_profiles: { display_name: string } | null
 }
 
+type RequestRow = {
+  id: string
+  query: string
+  note: string | null
+  contact: string | null
+  status: string
+  created_at: string
+  buyer_profiles: { display_name: string } | null
+}
+
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div className="p-5 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}>
@@ -57,6 +67,13 @@ export default async function AdminPage() {
   const { count: conversationCount } = await supabase
     .from('conversations')
     .select('id', { count: 'exact', head: true })
+
+  const { data: requestsData } = await supabase
+    .from('material_requests')
+    .select('id, query, note, contact, status, created_at, buyer_profiles(display_name)')
+    .order('created_at', { ascending: false })
+    .limit(50)
+  const requests = (requestsData ?? []) as unknown as RequestRow[]
 
   const deals = (data ?? []) as unknown as DealRow[]
   // GMV・手数料はキャンセル/返金を除いた有効取引で集計
@@ -135,6 +152,48 @@ export default async function AdminPage() {
                       <td className="px-3 py-3 whitespace-nowrap">
                         <span className="inline-flex px-2 py-0.5 text-[10px]" style={{ backgroundColor: 'var(--accent-pale)', color: 'var(--accent)' }}>
                           {STATUS_LABEL[d.status] ?? d.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        {/* 需要（欲しい素材リクエスト） */}
+        <section>
+          <p className="text-[10px] tracking-[0.2em] uppercase mb-4" style={{ color: 'var(--text-muted)' }}>
+            需要 — 欲しい素材リクエスト（{requests.length}件）
+          </p>
+          {requests.length === 0 ? (
+            <div className="border px-4 py-10 text-center" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>まだリクエストはありません。</p>
+            </div>
+          ) : (
+            <div className="border overflow-x-auto" style={{ borderColor: 'var(--border)' }}>
+              <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr className="border-b" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
+                    {['日付', '探している素材', '詳細', '連絡先', '買い手', '状態'].map((h) => (
+                      <th key={h} className="text-left px-3 py-3 text-[10px] tracking-widest font-normal whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {requests.map((r, i) => (
+                    <tr key={r.id} className="border-b align-top" style={{ borderColor: 'var(--border)', backgroundColor: i % 2 === 0 ? 'var(--bg)' : 'var(--bg-card)' }}>
+                      <td className="px-3 py-3 whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>
+                        {new Date(r.created_at).toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })}
+                      </td>
+                      <td className="px-3 py-3 font-serif" style={{ color: 'var(--text)', minWidth: 160 }}>{r.query}</td>
+                      <td className="px-3 py-3" style={{ color: 'var(--text-muted)', maxWidth: 260 }}>{r.note ?? '—'}</td>
+                      <td className="px-3 py-3" style={{ color: 'var(--text-muted)' }}>{r.contact ?? (r.buyer_profiles ? '（会員）' : '—')}</td>
+                      <td className="px-3 py-3" style={{ color: 'var(--text-muted)' }}>{r.buyer_profiles?.display_name ?? '匿名'}</td>
+                      <td className="px-3 py-3 whitespace-nowrap">
+                        <span className="inline-flex px-2 py-0.5 text-[10px]" style={{ backgroundColor: 'var(--accent-pale)', color: 'var(--accent)' }}>
+                          {r.status === 'matched' ? 'マッチ' : r.status === 'closed' ? '完了' : '募集中'}
                         </span>
                       </td>
                     </tr>

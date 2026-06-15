@@ -6,6 +6,7 @@ import { ArrowLeft, ChevronDown, ClipboardCheck, LayoutGrid, Layers, List, Messa
 import FilterSidebar from '@/components/materials/FilterSidebar'
 import MaterialCard from '@/components/materials/MaterialCard'
 import MaterialChat from '@/components/materials/MaterialChat'
+import RequestForm from '@/components/materials/RequestForm'
 import type { ColorGroup, Material, MaterialCategory, MaterialFilters } from '@/types/material'
 
 const QUICK_CATEGORIES: MaterialCategory[] = ['着物', '帯', '反物']
@@ -73,6 +74,7 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
   const [sortMode, setSortMode] = useState<'newest' | 'id' | 'category'>('newest')
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
+  const [requestOpen, setRequestOpen] = useState(false)
   // カテゴリー選択画面 → 一覧 の2段階。最初はカテゴリー選択を表示する。
   const [entered, setEntered] = useState(false)
   const hasFilters = Object.values(filters).some((value) => value !== undefined && (!Array.isArray(value) || value.length > 0))
@@ -338,6 +340,15 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
                   <span className="font-semibold">All Materials</span>
                   <span style={{ color: 'var(--text-muted)' }}> - {results.length} / {initialMaterials.length} items</span>
                 </p>
+                <button
+                  type="button"
+                  onClick={() => setRequestOpen(true)}
+                  className="inline-flex items-center gap-1.5 text-xs underline underline-offset-4 transition-opacity hover:opacity-70"
+                  style={{ color: 'var(--accent)' }}
+                >
+                  <Sparkles size={13} />
+                  探している素材をリクエスト
+                </button>
               </div>
               <div className="flex items-center gap-3">
                 <label className="relative inline-flex items-center">
@@ -366,11 +377,21 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
             </div>
 
             {results.length === 0 ? (
-              <div className="border py-20 text-center" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
+              <div className="border py-16 text-center" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
                 <p className="font-serif text-xl">該当する素材が見つかりませんでした</p>
-                <p className="mt-3 text-sm" style={{ color: 'var(--text-muted)' }}>
-                  条件を変えるか、用途から遙へご相談ください。
+                <p className="mt-3 text-sm leading-7" style={{ color: 'var(--text-muted)' }}>
+                  今はまだ無くても大丈夫です。<br className="sm:hidden" />
+                  「探している素材」を教えていただければ、遙が提供元にあたり、入荷したらお知らせします。
                 </p>
+                <button
+                  type="button"
+                  onClick={() => setRequestOpen(true)}
+                  className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: 'var(--accent)' }}
+                >
+                  <Sparkles size={16} />
+                  探している素材をリクエストする
+                </button>
               </div>
             ) : viewMode === 'list' ? (
               <div className="divide-y border-y bg-white" style={{ borderColor: 'var(--border)' }}>
@@ -390,6 +411,7 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
       </div>
 
       <ChatLauncher materials={initialMaterials} open={chatOpen} onOpen={() => setChatOpen(true)} onClose={() => setChatOpen(false)} />
+      <RequestForm open={requestOpen} defaultQuery={query} onClose={() => setRequestOpen(false)} />
     </main>
   )
 }
