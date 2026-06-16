@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export type FeaturedMaterial = {
   id: string
@@ -70,13 +71,6 @@ export default function HomeLanding({
   return (
     <>
       <style>{`
-        @keyframes hl-grain {
-          0%,100%{transform:translate(0,0)}25%{transform:translate(-2%,1%)}
-          50%{transform:translate(1%,-2%)}75%{transform:translate(2%,2%)}
-        }
-        @keyframes hl-ken {
-          from{transform:scale(1.08) translate(0,0)} to{transform:scale(1.18) translate(-1.5%,-1.5%)}
-        }
         @keyframes hl-scroll-cue {
           0%,100%{opacity:.25;transform:translateY(0)} 50%{opacity:.7;transform:translateY(6px)}
         }
@@ -135,7 +129,6 @@ export default function HomeLanding({
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
             backgroundSize: '256px 256px',
-            animation: 'hl-grain 0.5s steps(1) infinite',
           }}
         />
 
@@ -316,16 +309,16 @@ export default function HomeLanding({
           style={{ minHeight: '108vh' }}
         >
           {/* 布のクローズアップ（スクロール連動で奥行きズーム） */}
-          <div className="absolute inset-0 z-0">
-            <div
-              className="sd-zoom absolute inset-0"
-              style={{
-                backgroundImage: `url(${featured.image})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                willChange: 'transform',
-              }}
-            />
+          <div className="absolute inset-0 z-0 overflow-hidden">
+            <div className="sd-zoom absolute inset-0" style={{ willChange: 'transform' }}>
+              <Image
+                src={featured.image}
+                alt={featured.name}
+                fill
+                sizes="100vw"
+                className="object-cover"
+              />
+            </div>
           </div>
           <div
             className="pointer-events-none absolute inset-0 z-[1]"
@@ -427,13 +420,12 @@ export default function HomeLanding({
                     className="relative w-full overflow-hidden"
                     style={{ aspectRatio: '3 / 4', borderRadius: 3 }}
                   >
-                    <div
-                      className="absolute inset-0 transition-transform duration-700 group-hover:scale-105"
-                      style={{
-                        backgroundImage: `url(${m.image})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                      }}
+                    <Image
+                      src={m.image}
+                      alt={m.name}
+                      fill
+                      sizes="(min-width: 1280px) 300px, (min-width: 640px) 45vw, 90vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div
                       className="absolute inset-0"
