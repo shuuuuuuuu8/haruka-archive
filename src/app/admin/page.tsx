@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { LayoutDashboard, Plus } from 'lucide-react'
 import { requireAdmin } from '@/lib/admin/guard'
+import DeleteDealButton from './deals/DeleteDealButton'
 
 export const metadata = { title: '管理ダッシュボード' }
 
@@ -131,8 +132,8 @@ export default async function AdminPage() {
               <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
                 <thead>
                   <tr className="border-b" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
-                    {['日付', '素材', '買い手', '提供元', '金額', '手数料', '送金', '経路', 'ステータス'].map((h) => (
-                      <th key={h} className="text-left px-3 py-3 text-[10px] tracking-widest font-normal whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>{h}</th>
+                    {['日付', '素材', '買い手', '提供元', '金額', '手数料', '送金', '経路', 'ステータス', ''].map((h, i) => (
+                      <th key={h || `c${i}`} className="text-left px-3 py-3 text-[10px] tracking-widest font-normal whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -153,6 +154,9 @@ export default async function AdminPage() {
                         <span className="inline-flex px-2 py-0.5 text-[10px]" style={{ backgroundColor: 'var(--accent-pale)', color: 'var(--accent)' }}>
                           {STATUS_LABEL[d.status] ?? d.status}
                         </span>
+                      </td>
+                      <td className="px-3 py-3 text-right">
+                        <DeleteDealButton id={d.id} />
                       </td>
                     </tr>
                   ))}

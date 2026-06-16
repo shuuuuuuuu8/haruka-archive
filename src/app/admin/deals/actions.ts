@@ -1,6 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { requireAdmin } from '@/lib/admin/guard'
 
 export type CreateDealState = {
@@ -53,4 +54,11 @@ export async function createDeal(
   if (error) return { error: `記録に失敗しました（${error.message}）` }
 
   redirect('/admin?created=1')
+}
+
+// 成約を削除（テストデータのリセット用）。管理者のみ。RLS deals_write_admin_only でも二重に守られる。
+export async function deleteDeal(id: string): Promise<void> {
+  const { supabase } = await requireAdmin()
+  if (id) await supabase.from('deals').delete().eq('id', id)
+  revalidatePath('/admin')
 }
