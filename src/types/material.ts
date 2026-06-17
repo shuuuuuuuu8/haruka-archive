@@ -49,6 +49,8 @@ export interface Material {
   origin: string
   era: Era
   supplier: string
+  /** 実際の提供元名（提供元プロフィールの表示名。DPP/来歴ページで使用）。 */
+  supplierName?: string
   quantity: number
   quantityUnit: 'm' | '点' | '反'
   quantitySize: QuantitySize

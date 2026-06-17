@@ -92,6 +92,7 @@ interface MusubiMaterialRow {
   region: string | null
   created_at: string
   material_images: MusubiImage[] | null
+  supplier_profiles: { display_name: string } | null
 }
 
 export async function fetchMusubiMaterials(): Promise<Material[]> {
@@ -103,7 +104,8 @@ export async function fetchMusubiMaterials(): Promise<Material[]> {
         id, name, category, fabric_type, condition, color,
         quantity, price, is_negotiable, story,
         cultural_significance, era, region, created_at,
-        material_images(storage_path, is_primary, order_index)
+        material_images(storage_path, is_primary, order_index),
+        supplier_profiles(display_name)
       `,
       )
       .eq('is_available', true)
@@ -137,6 +139,7 @@ export async function fetchMusubiMaterials(): Promise<Material[]> {
         origin: m.region ?? '日本',
         era: mapEra(m.era),
         supplier: 'MUSUBI素材',
+        supplierName: m.supplier_profiles?.display_name ?? undefined,
         quantity: m.quantity,
         quantityUnit: '点',
         quantitySize: mapQuantitySize(m.quantity),
