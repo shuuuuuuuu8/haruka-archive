@@ -73,10 +73,13 @@ export default async function ProvenancePage({ params }: { params: Promise<{ id:
         {/* 来歴ファクト */}
         <dl className="mt-8">
           <Fact label="種類" value={m.category} />
-          <Fact label="素材・組成" value={m.materialType} />
+          <Fact label="素材・組成" value={m.attributes?.composition || m.materialType} />
+          <Fact label="柄・文様" value={m.attributes?.pattern} />
+          <Fact label="技法" value={m.attributes?.technique} />
           <Fact label="色" value={m.color} />
           <Fact label="産地" value={m.origin} />
           <Fact label="年代" value={era} />
+          <Fact label="職人・工房" value={m.attributes?.maker} />
           <Fact label="提供元" value={m.supplierName} />
         </dl>
 
@@ -85,6 +88,24 @@ export default async function ProvenancePage({ params }: { params: Promise<{ id:
           <section className="mt-10">
             <h2 className="font-serif text-lg" style={{ color: 'var(--text)' }}>この素材の物語</h2>
             <p className="mt-3 text-sm leading-8" style={{ color: 'var(--text-muted)' }}>{m.story}</p>
+          </section>
+        )}
+
+        {/* この素材から生まれた製品 */}
+        {m.attributes?.derived_products && m.attributes.derived_products.length > 0 && (
+          <section className="mt-8">
+            <h2 className="font-serif text-lg" style={{ color: 'var(--text)' }}>この素材から生まれた製品</h2>
+            <ul className="mt-3 space-y-2">
+              {m.attributes.derived_products.map((p, i) => (
+                <li key={i} className="flex items-baseline justify-between gap-3 border-b py-2" style={{ borderColor: 'var(--border)' }}>
+                  <span className="text-sm" style={{ color: 'var(--text)' }}>
+                    {p.name}
+                    {p.note ? <span className="ml-2 text-xs" style={{ color: 'var(--text-muted)' }}>{p.note}</span> : null}
+                  </span>
+                  {p.count ? <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{p.count}点</span> : null}
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 

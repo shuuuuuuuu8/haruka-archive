@@ -51,6 +51,15 @@ export interface Material {
   supplier: string
   /** 実際の提供元名（提供元プロフィールの表示名。DPP/来歴ページで使用）。 */
   supplierName?: string
+  /** 来歴/DPPの追加属性（柄・組成・技法・職人・この素材から生まれた製品など）。 */
+  attributes?: {
+    pattern?: string
+    composition?: string
+    technique?: string
+    maker?: string
+    derived_products?: { name: string; count?: number; note?: string }[]
+    [key: string]: unknown
+  }
   quantity: number
   quantityUnit: 'm' | '点' | '反'
   quantitySize: QuantitySize
