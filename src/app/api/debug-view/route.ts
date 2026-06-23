@@ -8,10 +8,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
-  const hasKey = !!process.env.MUSUBI_SERVICE_ROLE_KEY
-  const keyHint = process.env.MUSUBI_SERVICE_ROLE_KEY
-    ? `${process.env.MUSUBI_SERVICE_ROLE_KEY.slice(0, 10)}…(len ${process.env.MUSUBI_SERVICE_ROLE_KEY.length})`
-    : '(none)'
+  const key = process.env.MUSUBI_SERVICE_ROLE_KEY ?? ''
+  const hasKey = !!key
+  // 鍵の値は一切返さない。種別（形式）だけ判定して返す。
+  const keyKind = !key
+    ? 'none'
+    : key.startsWith('sb_secret')
+      ? 'secret(new)'
+      : key.startsWith('sb_publishable')
+        ? 'publishable(WRONG=public)'
+        : key.startsWith('eyJ')
+          ? 'jwt(legacy anon/service)'
+          : 'unknown'
   const hasUrl = !!process.env.NEXT_PUBLIC_MUSUBI_SUPABASE_URL
 
   let insertResult: unknown = 'skipped'
@@ -37,5 +45,5 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ hasKey, keyHint, hasUrl, insertResult, countResult })
+  return NextResponse.json({ hasKey, keyKind, hasUrl, insertResult, countResult })
 }
