@@ -76,6 +76,12 @@ export default async function AdminPage() {
     .limit(50)
   const requests = (requestsData ?? []) as unknown as RequestRow[]
 
+  // 来歴ページ閲覧数（検証：物語が見られているか）
+  const { count: provenanceViews } = await supabase
+    .from('events')
+    .select('id', { count: 'exact', head: true })
+    .eq('type', 'provenance_viewed')
+
   const deals = (data ?? []) as unknown as DealRow[]
   // GMV・手数料はキャンセル/返金を除いた有効取引で集計
   const active = deals.filter((d) => !['cancelled', 'refunded'].includes(d.status))
@@ -107,11 +113,12 @@ export default async function AdminPage() {
         {/* KPI */}
         <section>
           <p className="text-[10px] tracking-[0.2em] uppercase mb-4" style={{ color: 'var(--text-muted)' }}>経営数字</p>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
             <StatCard label="GMV（流通総額）" value={yen(gmv)} sub={`有効成約 ${active.length} 件`} />
             <StatCard label="手数料売上（10%）" value={yen(commission)} sub="遙の売上" />
             <StatCard label="成約数" value={active.length} sub={`全 ${deals.length} 件中`} />
             <StatCard label="成約率" value={`${cvr}%`} sub={`相談 ${convCount} 件 → 成約`} />
+            <StatCard label="来歴ページ閲覧" value={provenanceViews ?? 0} sub="QR/物語が見られた回数" />
           </div>
         </section>
 

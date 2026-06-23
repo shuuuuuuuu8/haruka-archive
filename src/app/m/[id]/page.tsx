@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getAllMaterials } from '@/lib/get-materials'
+import ViewTracker from './ViewTracker'
 
 export const revalidate = 300
 export const dynamicParams = true
@@ -46,6 +47,7 @@ export default async function ProvenancePage({ params }: { params: Promise<{ id:
 
   return (
     <main className="pt-20" style={{ backgroundColor: 'var(--bg)' }}>
+      {m.sourceId && <ViewTracker materialUuid={m.sourceId} displayId={m.id} />}
       <div className="mx-auto max-w-2xl px-4 pb-20 sm:px-6">
         {/* ヘッダー：素材パスポート */}
         <div className="py-6 text-center">
