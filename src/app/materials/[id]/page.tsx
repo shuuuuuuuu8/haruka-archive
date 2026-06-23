@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, MessageSquare } from 'lucide-react'
+import { ArrowLeft, MessageSquare, QrCode } from 'lucide-react'
 import { StatusBadge, VerifiedBadge } from '@/components/ui/StatusBadge'
 import { ContactButton } from '@/components/materials/ContactButton'
 import { getAllMaterials } from '@/lib/get-materials'
@@ -177,6 +177,22 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
                 </Link>
               )}
             </div>
+
+            {/* 来歴ページ（QRの飛び先・素材の履歴） */}
+            <Link
+              href={`/m/${material.id}`}
+              className="mt-4 flex items-center justify-between gap-3 border p-4 transition-colors hover:bg-[var(--accent-pale)]"
+              style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}
+            >
+              <span className="flex items-center gap-3">
+                <QrCode size={18} style={{ color: 'var(--accent)' }} />
+                <span>
+                  <span className="block text-sm" style={{ color: 'var(--text)' }}>この素材の履歴ページを見る</span>
+                  <span className="block text-[11px]" style={{ color: 'var(--text-muted)' }}>産地・来歴・物語をまとめた公開ページ（QR対応）</span>
+                </span>
+              </span>
+              <ArrowLeft size={14} className="rotate-180" style={{ color: 'var(--accent)' }} />
+            </Link>
           </section>
         </div>
       </div>
