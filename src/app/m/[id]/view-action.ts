@@ -1,34 +1,19 @@
 'use server'
 
-import { cookies } from 'next/headers'
 import { createServiceClient } from '@/lib/notify/service-client'
 import { createBuyerServerClient } from '@/lib/buyer/server'
 
 // 来歴ページの閲覧を events に記録する（検証用：誰が物語を見たか）。
-// 「全員を識別」: 端末ごとの匿名訪問者ID(cookie) + ログイン中なら buyer_id。
+// 「全員を識別」: 端末ごとの匿名訪問者ID(クライアントのlocalStorage発行) + ログイン中なら buyer_id。
 // 個人名は匿名通行人には取れない（取ろうとすると閲覧自体が消える）ため、
 // 同一人物判定できる匿名IDで実訪問者数を、会員は実名で追えるようにする。
 // events への書き込みは service role 経由。失敗しても画面には影響させない。
-export async function logProvenanceView(materialUuid: string, displayId: string) {
+export async function logProvenanceView(materialUuid: string, displayId: string, visitorId: string) {
   if (!materialUuid) return
   if (!process.env.MUSUBI_SERVICE_ROLE_KEY) return
 
   try {
-    // 1) 端末ごとの匿名訪問者ID（無ければ発行）
-    const jar = await cookies()
-    let visitorId = jar.get('mv_visitor')?.value
-    if (!visitorId) {
-      visitorId = crypto.randomUUID()
-      jar.set('mv_visitor', visitorId, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: true,
-        maxAge: 60 * 60 * 24 * 365, // 1年
-        path: '/',
-      })
-    }
-
-    // 2) ログイン中なら買い手を特定（実名で追える）
+    // ログイン中なら買い手を特定（実名で追える）
     let buyerId: string | null = null
     let buyerName: string | null = null
     try {
