@@ -76,11 +76,42 @@ export default async function AdminPage() {
     .limit(50)
   const requests = (requestsData ?? []) as unknown as RequestRow[]
 
-  // 来歴ページ閲覧数（検証：物語が見られているか）
-  const { count: provenanceViews } = await supabase
+  // 来歴ページ閲覧（検証：誰が・どの素材の物語を見たか）
+  const { data: viewEvents } = await supabase
     .from('events')
-    .select('id', { count: 'exact', head: true })
+    .select('subject_id, payload, created_at')
     .eq('type', 'provenance_viewed')
+    .order('created_at', { ascending: false })
+    .limit(2000)
+
+  type ViewEv = {
+    subject_id: string | null
+    payload: { display_id?: string; visitor_id?: string; buyer_name?: string | null } | null
+    created_at: string
+  }
+  const views = (viewEvents ?? []) as ViewEv[]
+  const provenanceViews = views.length // 延べ閲覧
+  const uniqueVisitors = new Set(
+    views.map((v) => v.payload?.visitor_id).filter(Boolean),
+  ).size // 実訪問者数
+
+  // 素材別の閲覧集計（延べ・実訪問者）
+  const byMaterial = new Map<string, { display: string; total: number; visitors: Set<string> }>()
+  for (const v of views) {
+    const key = v.subject_id ?? 'unknown'
+    const cur = byMaterial.get(key) ?? { display: v.payload?.display_id ?? key, total: 0, visitors: new Set<string>() }
+    cur.total += 1
+    if (v.payload?.visitor_id) cur.visitors.add(v.payload.visitor_id)
+    byMaterial.set(key, cur)
+  }
+  const materialRanking = [...byMaterial.values()]
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 20)
+
+  // 会員（ログイン中の買い手）による閲覧（実名で追える）
+  const memberViews = views
+    .filter((v) => v.payload?.buyer_name)
+    .slice(0, 30)
 
   const deals = (data ?? []) as unknown as DealRow[]
   // GMV・手数料はキャンセル/返金を除いた有効取引で集計
@@ -118,7 +149,7 @@ export default async function AdminPage() {
             <StatCard label="手数料売上（10%）" value={yen(commission)} sub="遙の売上" />
             <StatCard label="成約数" value={active.length} sub={`全 ${deals.length} 件中`} />
             <StatCard label="成約率" value={`${cvr}%`} sub={`相談 ${convCount} 件 → 成約`} />
-            <StatCard label="来歴ページ閲覧" value={provenanceViews ?? 0} sub="QR/物語が見られた回数" />
+            <StatCard label="来歴ページ閲覧" value={provenanceViews} sub={`実訪問者 ${uniqueVisitors} 人`} />
           </div>
         </section>
 
@@ -214,6 +245,70 @@ export default async function AdminPage() {
             </div>
           )}
         </section>
+
+        {/* 来歴ページ：素材別の閲覧 */}
+        <section>
+          <p className="text-[10px] tracking-[0.2em] uppercase mb-4" style={{ color: 'var(--text-muted)' }}>
+            来歴ページ — 素材別の閲覧（延べ {provenanceViews} / 実訪問者 {uniqueVisitors} 人）
+          </p>
+          {materialRanking.length === 0 ? (
+            <div className="border px-4 py-10 text-center" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>まだ閲覧はありません。</p>
+            </div>
+          ) : (
+            <div className="border overflow-x-auto" style={{ borderColor: 'var(--border)' }}>
+              <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr className="border-b" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
+                    {['素材', '実訪問者', '延べ閲覧'].map((h) => (
+                      <th key={h} className="text-left px-3 py-3 text-[10px] tracking-widest font-normal whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {materialRanking.map((m, i) => (
+                    <tr key={m.display} className="border-b" style={{ borderColor: 'var(--border)', backgroundColor: i % 2 === 0 ? 'var(--bg)' : 'var(--bg-card)' }}>
+                      <td className="px-3 py-3 font-serif" style={{ color: 'var(--text)' }}>{m.display}</td>
+                      <td className="px-3 py-3" style={{ color: 'var(--accent)' }}>{m.visitors.size} 人</td>
+                      <td className="px-3 py-3" style={{ color: 'var(--text-muted)' }}>{m.total} 回</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        {/* 会員による来歴閲覧（実名で追える） */}
+        {memberViews.length > 0 && (
+          <section>
+            <p className="text-[10px] tracking-[0.2em] uppercase mb-4" style={{ color: 'var(--text-muted)' }}>
+              会員による来歴閲覧（{memberViews.length}件）
+            </p>
+            <div className="border overflow-x-auto" style={{ borderColor: 'var(--border)' }}>
+              <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr className="border-b" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
+                    {['日時', '会員', '見た素材'].map((h) => (
+                      <th key={h} className="text-left px-3 py-3 text-[10px] tracking-widest font-normal whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {memberViews.map((v, i) => (
+                    <tr key={i} className="border-b" style={{ borderColor: 'var(--border)', backgroundColor: i % 2 === 0 ? 'var(--bg)' : 'var(--bg-card)' }}>
+                      <td className="px-3 py-3 whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>
+                        {new Date(v.created_at).toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })}
+                      </td>
+                      <td className="px-3 py-3" style={{ color: 'var(--text)' }}>{v.payload?.buyer_name}</td>
+                      <td className="px-3 py-3 font-serif" style={{ color: 'var(--text-muted)' }}>{v.payload?.display_id ?? v.subject_id}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
       </div>
     </div>
   )
