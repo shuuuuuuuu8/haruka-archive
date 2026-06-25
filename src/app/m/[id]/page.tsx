@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { Leaf } from 'lucide-react'
 import { getAllMaterials } from '@/lib/get-materials'
 import ViewTracker from './ViewTracker'
 
@@ -92,6 +93,26 @@ export default async function ProvenancePage({ params }: { params: Promise<{ id:
             <p className="mt-3 text-sm leading-8" style={{ color: 'var(--text-muted)' }}>{m.story}</p>
           </section>
         )}
+
+        {/* 環境への配慮（断定しない・概算/推定を明記。優良誤認を避ける） */}
+        <section className="mt-8 border p-4" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
+          <h2 className="flex items-center gap-2 font-serif text-lg" style={{ color: 'var(--text)' }}>
+            <Leaf size={18} style={{ color: 'var(--accent)' }} />
+            環境への配慮
+          </h2>
+          <p className="mt-3 text-sm leading-8" style={{ color: 'var(--text-muted)' }}>
+            この素材は、新たに生産されたものではなく、すでにつくられ眠っていた{m.attributes?.composition || m.materialType}を活かしています。
+            布を一から生産する場合と比べ、原料の栽培・紡績・染色などにかかる水やエネルギーを抑えられると考えられます。
+          </p>
+          <ul className="mt-3 space-y-1.5 text-sm" style={{ color: 'var(--text-muted)' }}>
+            <li>・ 新規生産を回避（再生産されない一点ものの素材）</li>
+            <li>・ 廃棄されうる素材を、次のものづくりへ</li>
+          </ul>
+          <p className="mt-3 text-[11px] leading-6" style={{ color: 'var(--text-faint, var(--text-muted))', opacity: 0.7 }}>
+            ※ 環境負荷の削減は一般的な傾向にもとづく説明です。具体的な削減量を示すものではありません。
+            定量的な評価（LCA等）が必要な場合は、別途ご相談ください。
+          </p>
+        </section>
 
         {/* この素材から生まれた製品 */}
         {m.attributes?.derived_products && m.attributes.derived_products.length > 0 && (
