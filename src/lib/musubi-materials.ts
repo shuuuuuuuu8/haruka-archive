@@ -8,6 +8,7 @@ import type {
   PriceRange,
 } from '@/types/material'
 import { musubiSupabase, getMusubiImageUrl } from './musubi-supabase'
+import { createServiceClient } from '@/lib/notify/service-client'
 
 // カテゴリマッピング（musubi登録カテゴリ → 表示カテゴリー）
 // 登録時に選んだ種類をそのままカテゴリーとして使う。
@@ -171,5 +172,59 @@ export async function fetchMusubiMaterials(): Promise<Material[]> {
     return (data as unknown as MusubiMaterialRow[]).map(mapRow)
   } catch {
     return []
+  }
+}
+
+// 32桁hex(ダッシュ無し)を 8-4-4-4-12 のUUID文字列に整形する。
+function hexToUuid(hex32: string): string {
+  return `${hex32.slice(0, 8)}-${hex32.slice(8, 12)}-${hex32.slice(12, 16)}-${hex32.slice(16, 20)}-${hex32.slice(20, 32)}`
+}
+
+// 来歴ID（MSB- + hexプレフィックス）から、materials.id(uuid) の検索範囲を作る。
+// 例: "MSB-A1B2C3D4" → lower=a1b2c3d4-0000-...-000000000000, upper=a1b2c3d4-ffff-...-ffffffffffff
+export function provenanceIdToUuidRange(
+  provId: string,
+): { lower: string; upper: string } | null {
+  const raw = provId.trim().replace(/^MSB-/i, '').toLowerCase()
+  // hexのみ・8〜32桁を許容（8桁=旧QR、12桁=新QR）
+  if (!/^[0-9a-f]{8,32}$/.test(raw)) return null
+  const lower = hexToUuid((raw + '0'.repeat(32)).slice(0, 32))
+  const upper = hexToUuid((raw + 'f'.repeat(32)).slice(0, 32))
+  return { lower, upper }
+}
+
+export async function fetchMusubiMaterialByProvenanceId(
+  provId: string,
+): Promise<Material | null> {
+  const range = provenanceIdToUuidRange(provId)
+  if (!range) return null
+  if (!process.env.MUSUBI_SERVICE_ROLE_KEY) return null
+  try {
+    // service-role（サーバ限定・RLSバイパス）。成約済みでも来歴を解決するため。
+    const { data, error } = await createServiceClient()
+      .from('materials')
+      // 成約済み(is_available=false)でも来歴は表示する＝is_availableフィルタを付けない
+      .select(
+        `
+        id, name, category, fabric_type, condition, color,
+        quantity, price, is_negotiable, story,
+        cultural_significance, era, region, created_at, attributes,
+        material_images(storage_path, is_primary, order_index),
+        supplier_profiles(display_name)
+      `,
+      )
+      .gte('id', range.lower)
+      .lte('id', range.upper)
+      .limit(2)
+
+    if (error || !data || data.length === 0) return null
+    if (data.length > 1) {
+      // プレフィックス衝突。当てずっぽうで別素材を見せない安全側。
+      console.warn(`[provenance] ambiguous prefix for ${provId} (${data.length} matches)`)
+      return null
+    }
+    return mapRow(data[0] as unknown as MusubiMaterialRow)
+  } catch {
+    return null
   }
 }
