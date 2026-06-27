@@ -48,6 +48,10 @@ export interface Material {
   pattern: PatternType
   origin: string
   era: Era
+  /** 提供元が入力した生の年代文字列（例: 「昭和30年代」）。丸めない。来歴ページ用。 */
+  eraText?: string
+  /** 提供元が入力した生の産地。空なら未設定（「日本」補完しない）。来歴ページ用。 */
+  regionText?: string
   supplier: string
   /** 実際の提供元名（提供元プロフィールの表示名。DPP/来歴ページで使用）。 */
   supplierName?: string

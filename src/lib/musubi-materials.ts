@@ -96,6 +96,60 @@ interface MusubiMaterialRow {
   supplier_profiles: { display_name: string } | null
 }
 
+export function mapRow(m: MusubiMaterialRow): Material {
+  const images = (m.material_images ?? [])
+    .slice()
+    .sort((a, b) => a.order_index - b.order_index)
+  const imageUrls =
+    images.length > 0
+      ? images.map((img) => getMusubiImageUrl(img.storage_path))
+      : ['/placeholder-material.jpg']
+
+  const category = ITEM_CATEGORY_MAP[m.category] ?? 'その他'
+
+  const COLOR_GROUP_VALUES: ColorGroup[] = ['白系', '黒系', '藍系', '赤系', '金系', '茶系', '緑系', '多色', 'その他']
+  const colorGroup: ColorGroup = (COLOR_GROUP_VALUES.includes(m.color as ColorGroup) ? m.color : 'その他') as ColorGroup
+
+  return {
+    id: `MSB-${m.id.slice(0, 12).toUpperCase()}`,
+    sourceId: m.id,
+    name: m.name,
+    category,
+    materialType: fabricLabels[m.fabric_type] ?? '不明',
+    color: colorGroup,
+    pattern: 'その他' as PatternType,
+    origin: m.region ?? '日本',
+    era: mapEra(m.era),
+    eraText: m.era ?? undefined,
+    regionText: m.region ?? undefined,
+    supplier: 'MUSUBI素材',
+    supplierName: m.supplier_profiles?.display_name ?? undefined,
+    attributes: (m.attributes as Material['attributes']) ?? undefined,
+    quantity: m.quantity,
+    quantityUnit: '点',
+    quantitySize: mapQuantitySize(m.quantity),
+    priceRange: mapPriceRange(m.price, m.is_negotiable),
+    status: 'public',
+    recommendedUses: ['アップサイクル', 'アート'],
+    story: m.story ?? '',
+    characteristics: m.cultural_significance ?? '',
+    images: imageUrls,
+    tags: [
+      categoryLabels[m.category] ?? 'その他',
+      fabricLabels[m.fabric_type] ?? '不明',
+      'MUSUBI素材',
+      ...(m.region ? [m.region] : []),
+    ],
+    sampleAvailable: false,
+    isFeatured: false,
+    verifiedFields: ['category', 'materialType'],
+    pendingFields: [],
+    estimatedFields: [],
+    createdAt: m.created_at,
+    updatedAt: m.created_at,
+  }
+}
+
 export async function fetchMusubiMaterials(): Promise<Material[]> {
   try {
     const { data, error } = await musubiSupabase
@@ -114,60 +168,7 @@ export async function fetchMusubiMaterials(): Promise<Material[]> {
 
     if (error || !data) return []
 
-    return (data as unknown as MusubiMaterialRow[]).map((m) => {
-      const images = (m.material_images ?? [])
-        .slice()
-        .sort((a, b) => a.order_index - b.order_index)
-      const imageUrls =
-        images.length > 0
-          ? images.map((img) => getMusubiImageUrl(img.storage_path))
-          : ['/placeholder-material.jpg']
-
-      // カテゴリ: 登録時に選んだ種類（着物・帯・反物 等）を使う
-      const category = ITEM_CATEGORY_MAP[m.category] ?? 'その他'
-
-      const COLOR_GROUP_VALUES: ColorGroup[] = ['白系', '黒系', '藍系', '赤系', '金系', '茶系', '緑系', '多色', 'その他']
-      const colorGroup: ColorGroup = (COLOR_GROUP_VALUES.includes(m.color as ColorGroup) ? m.color : 'その他') as ColorGroup
-
-      const material: Material = {
-        id: `MSB-${m.id.slice(0, 8).toUpperCase()}`,
-        sourceId: m.id,
-        name: m.name,
-        category,
-        materialType: fabricLabels[m.fabric_type] ?? '不明',
-        color: colorGroup,
-        pattern: 'その他' as PatternType,
-        origin: m.region ?? '日本',
-        era: mapEra(m.era),
-        supplier: 'MUSUBI素材',
-        supplierName: m.supplier_profiles?.display_name ?? undefined,
-        attributes: (m.attributes as Material['attributes']) ?? undefined,
-        quantity: m.quantity,
-        quantityUnit: '点',
-        quantitySize: mapQuantitySize(m.quantity),
-        priceRange: mapPriceRange(m.price, m.is_negotiable),
-        status: 'public',
-        recommendedUses: ['アップサイクル', 'アート'],
-        story: m.story ?? '',
-        characteristics: m.cultural_significance ?? '',
-        images: imageUrls,
-        tags: [
-          categoryLabels[m.category] ?? 'その他',
-          fabricLabels[m.fabric_type] ?? '不明',
-          'MUSUBI素材',
-          ...(m.region ? [m.region] : []),
-        ],
-        sampleAvailable: false,
-        isFeatured: false,
-        verifiedFields: ['category', 'materialType'],
-        pendingFields: [],
-        estimatedFields: [],
-        createdAt: m.created_at,
-        updatedAt: m.created_at,
-      }
-
-      return material
-    })
+    return (data as unknown as MusubiMaterialRow[]).map(mapRow)
   } catch {
     return []
   }
