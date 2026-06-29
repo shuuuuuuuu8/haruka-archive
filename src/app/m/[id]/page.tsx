@@ -120,7 +120,7 @@ export default async function ProvenancePage({ params }: { params: Promise<{ id:
         </section>
 
         {/* この素材から生まれた製品 */}
-        {m.attributes?.derived_products && m.attributes.derived_products.length > 0 && (
+        {Array.isArray(m.attributes?.derived_products) && m.attributes.derived_products.length > 0 && (
           <section className="mt-8">
             <h2 className="font-serif text-lg" style={{ color: 'var(--text)' }}>この素材から生まれた製品</h2>
             <ul className="mt-3 space-y-2">
