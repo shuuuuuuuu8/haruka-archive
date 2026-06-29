@@ -112,7 +112,7 @@ export function mapRow(m: MusubiMaterialRow): Material {
   const colorGroup: ColorGroup = (COLOR_GROUP_VALUES.includes(m.color as ColorGroup) ? m.color : 'その他') as ColorGroup
 
   return {
-    id: `MSB-${m.id.slice(0, 12).toUpperCase()}`,
+    id: `MSB-${m.id.replace(/-/g, '').slice(0, 12).toUpperCase()}`,
     sourceId: m.id,
     name: m.name,
     category,
@@ -185,7 +185,9 @@ function hexToUuid(hex32: string): string {
 export function provenanceIdToUuidRange(
   provId: string,
 ): { lower: string; upper: string } | null {
-  const raw = provId.trim().replace(/^MSB-/i, '').toLowerCase()
+  // UUIDの先頭スライスはハイフンを含みうる（例 "82103829-5bc"）。
+  // MSB- を外し、ハイフンも全て除去してhexプレフィックスだけにする。
+  const raw = provId.trim().replace(/^MSB-/i, '').replace(/-/g, '').toLowerCase()
   // hexのみ・8〜32桁を許容（8桁=旧QR、12桁=新QR）
   if (!/^[0-9a-f]{8,32}$/.test(raw)) return null
   const lower = hexToUuid((raw + '0'.repeat(32)).slice(0, 32))
