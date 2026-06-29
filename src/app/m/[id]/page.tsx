@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Leaf } from 'lucide-react'
 import { getAllMaterials } from '@/lib/get-materials'
+import { fetchMusubiMaterialByProvenanceId } from '@/lib/musubi-materials'
 import ViewTracker from './ViewTracker'
 
 export const revalidate = 300
@@ -16,8 +17,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const materials = await getAllMaterials()
-  const m = materials.find((x) => x.id === id)
+  const m = await fetchMusubiMaterialByProvenanceId(id)
   if (!m) return { title: '素材が見つかりません', robots: { index: false, follow: false } }
   const title = `${m.name}の来歴 | 結 素材バンク`
   const description = `${m.name}（${m.materialType}・${m.origin}）の素材の履歴。${m.story ? m.story.slice(0, 80) : ''}`
@@ -40,11 +40,11 @@ function Fact({ label, value }: { label: string; value?: string }) {
 
 export default async function ProvenancePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const materials = await getAllMaterials()
-  const m = materials.find((x) => x.id === id)
+  const m = await fetchMusubiMaterialByProvenanceId(id)
   if (!m) notFound()
 
-  const era = m.era && m.era !== '不明' ? m.era : undefined
+  // 来歴ページは丸めない生の年代を優先（例「昭和30年代」）。無ければ粗い列挙を補助的に。
+  const era = m.eraText?.trim() || (m.era && m.era !== '不明' ? m.era : undefined)
 
   return (
     <main className="pt-20" style={{ backgroundColor: 'var(--bg)' }}>
@@ -80,11 +80,16 @@ export default async function ProvenancePage({ params }: { params: Promise<{ id:
           <Fact label="柄・文様" value={m.attributes?.pattern} />
           <Fact label="技法" value={m.attributes?.technique} />
           <Fact label="色" value={m.color} />
-          <Fact label="産地" value={m.origin} />
+          <Fact label="産地" value={m.regionText} />
           <Fact label="年代" value={era} />
           <Fact label="職人・工房" value={m.attributes?.maker} />
           <Fact label="提供元" value={m.supplierName} />
         </dl>
+
+        {/* 出所の明示（優良誤認を避ける・検証済みを詐称しない） */}
+        <p className="mt-3 text-[11px] leading-6" style={{ color: 'var(--text-muted)', opacity: 0.8 }}>
+          ※ 上記は提供元による申告にもとづく情報です（第三者による検証ではありません）。
+        </p>
 
         {/* 物語 */}
         {m.story && (
