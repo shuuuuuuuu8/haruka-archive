@@ -199,8 +199,8 @@ export async function fetchMusubiMaterialByProvenanceId(
   provId: string,
 ): Promise<Material | null> {
   const range = provenanceIdToUuidRange(provId)
-  if (!range) return null
-  if (!process.env.MUSUBI_SERVICE_ROLE_KEY) return null
+  if (!range) { console.warn(`[prov] bad-id "${provId}"`); return null }
+  if (!process.env.MUSUBI_SERVICE_ROLE_KEY) { console.warn('[prov] no-service-role-key'); return null }
   try {
     // service-role（サーバ限定・RLSバイパス）。成約済みでも来歴を解決するため。
     const { data, error } = await createServiceClient()
@@ -219,14 +219,16 @@ export async function fetchMusubiMaterialByProvenanceId(
       .lte('id', range.upper)
       .limit(2)
 
-    if (error || !data || data.length === 0) return null
+    if (error) { console.warn(`[prov] query-error "${provId}" range=${range.lower}..${range.upper}: ${error.message}`); return null }
+    if (!data || data.length === 0) { console.warn(`[prov] not-found "${provId}" range=${range.lower}..${range.upper}`); return null }
     if (data.length > 1) {
       // プレフィックス衝突。当てずっぽうで別素材を見せない安全側。
-      console.warn(`[provenance] ambiguous prefix for ${provId} (${data.length} matches)`)
+      console.warn(`[prov] ambiguous "${provId}" (${data.length} matches)`)
       return null
     }
     return mapRow(data[0] as unknown as MusubiMaterialRow)
-  } catch {
+  } catch (e) {
+    console.warn(`[prov] threw "${provId}": ${(e as Error)?.message}`)
     return null
   }
 }

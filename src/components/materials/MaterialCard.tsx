@@ -4,7 +4,23 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Material } from '@/types/material'
 
+// 空扱いする値（未入力・不明・文字列"null"など）を除外して整形する。
+const EMPTY_VALUES = new Set(['', '不明', 'null', 'undefined', 'その他'])
+function clean(value?: string | null): string | null {
+  const v = value?.trim()
+  return v && !EMPTY_VALUES.has(v) ? v : null
+}
+
 export default function MaterialCard({ material }: { material: Material }) {
+  const subtitle = [
+    clean(material.category),
+    clean(material.color),
+    clean(material.eraText) ?? clean(material.era),
+    clean(material.regionText),
+  ]
+    .filter(Boolean)
+    .join(' · ')
+
   return (
     <Link href={`/materials/${material.id}`} className="group block h-full">
       <article
@@ -26,6 +42,11 @@ export default function MaterialCard({ material }: { material: Material }) {
               {material.materialType}
             </p>
             <h3 className="mt-1 font-serif text-lg font-medium leading-snug">{material.name}</h3>
+            {subtitle && (
+              <p className="mt-1.5 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                {subtitle}
+              </p>
+            )}
           </div>
         </div>
       </article>

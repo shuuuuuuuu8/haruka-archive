@@ -16,7 +16,7 @@ export default async function BuyerLoginPage({
         <div className="mb-6 text-center">
           <p className="text-xs tracking-[0.24em]" style={{ color: 'var(--accent)' }}>結 素材バンク</p>
           <h1 className="mt-1 font-serif text-2xl">ログイン</h1>
-          <p className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>相談・購入にはログインが必要です</p>
+          <p className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>素材のご相談にはログインが必要です</p>
         </div>
         <AuthForm mode="login" next={safeNext} />
       </div>
