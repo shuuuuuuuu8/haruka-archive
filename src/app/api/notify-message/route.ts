@@ -11,18 +11,30 @@ function escapeHtml(s: string) {
   )
 }
 
-async function sendEmail(to: string, subject: string, html: string) {
+// 戻り値は net._http_response の content から読める診断コード
+async function sendEmail(to: string, subject: string, html: string): Promise<string> {
   const key = process.env.RESEND_API_KEY
   if (!key) {
     console.warn('[notify] RESEND_API_KEY 未設定。送信スキップ')
-    return
+    return 'no-resend-key'
   }
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ from: FROM, to, subject, html }),
   })
-  if (!res.ok) console.error('[notify] Resend送信失敗', res.status, await res.text())
+  if (!res.ok) {
+    const detail = await res.text()
+    console.error('[notify] Resend送信失敗', res.status, detail)
+    return `resend-${res.status}:${detail.slice(0, 120)}`
+  }
+  return 'sent'
+}
+
+// メールアドレスをログ用に伏せる（例: ya***@gmail.com）
+function maskEmail(email: string) {
+  const [local, domain] = email.split('@')
+  return `${local.slice(0, 2)}***@${domain ?? ''}`
 }
 
 // Supabase Database Webhook（messages への INSERT）から呼ばれる。
@@ -36,15 +48,25 @@ export async function POST(req: NextRequest) {
   const record = payload?.record as
     | { conversation_id?: string; sender_role?: string; body?: string }
     | undefined
-  if (!record?.conversation_id) return NextResponse.json({ ok: true })
+  if (!record?.conversation_id)
+    return NextResponse.json({ ok: true, stage: 'no-record' })
 
   const supabase = createServiceClient()
-  const { data: conv } = await supabase
+  const { data: conv, error: convError } = await supabase
     .from('conversations')
     .select('id, materials(name), buyer_profiles(user_id), supplier_profiles(user_id)')
     .eq('id', record.conversation_id)
     .single()
-  if (!conv) return NextResponse.json({ ok: true })
+  if (convError) {
+    console.error('[notify] 会話の取得に失敗:', convError)
+    return NextResponse.json({
+      ok: false,
+      stage: 'conv-fetch',
+      code: convError.code,
+      message: convError.message,
+    })
+  }
+  if (!conv) return NextResponse.json({ ok: true, stage: 'conv-not-found' })
 
   const materialName = (conv.materials as { name?: string } | null)?.name ?? '素材'
   const buyerUserId = (conv.buyer_profiles as { user_id?: string } | null)?.user_id
@@ -62,14 +84,26 @@ export async function POST(req: NextRequest) {
     if (supplierUserId) targets.push({ userId: supplierUserId, link: `${SUPPLIER_SITE}/chats/${conv.id}` })
   }
 
+  if (targets.length === 0)
+    return NextResponse.json({
+      ok: true,
+      stage: 'no-targets',
+      role: record.sender_role ?? null,
+    })
+
   const snippet = escapeHtml(String(record.body ?? '').slice(0, 120))
   const name = escapeHtml(materialName)
+  const results: string[] = []
 
   for (const t of targets) {
-    const { data } = await supabase.auth.admin.getUserById(t.userId)
+    const { data, error: userError } = await supabase.auth.admin.getUserById(t.userId)
     const email = data?.user?.email
-    if (!email) continue
-    await sendEmail(
+    if (!email) {
+      console.error('[notify] 相手のメール取得に失敗:', userError ?? 'email無し')
+      results.push(`no-email:${userError?.message?.slice(0, 80) ?? 'empty'}`)
+      continue
+    }
+    const sendResult = await sendEmail(
       email,
       `【結 素材バンク】「${materialName}」に新しいメッセージ`,
       `<div style="font-family:sans-serif;line-height:1.8;color:#1a1a1a">
@@ -80,7 +114,8 @@ export async function POST(req: NextRequest) {
         <p style="font-size:12px;color:#999">結 素材バンク</p>
       </div>`,
     )
+    results.push(`${maskEmail(email)}=${sendResult}`)
   }
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, stage: 'done', results })
 }
