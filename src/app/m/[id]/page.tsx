@@ -34,7 +34,15 @@ async function resolveProvenanceMaterial(id: string) {
   const viaService = await fetchMusubiMaterialByProvenanceId(id)
   if (viaService) return viaService
   const all = await getAllMaterials()
-  return all.find((x) => x.id === id) ?? null
+  // 完全一致だと「MSB-＋12桁大文字」以外（旧8桁QR・小文字・純hex）が
+  // 全て404になるため、service側と同じ正規化でプレフィックス一致させる。
+  const raw = id.trim().replace(/^MSB-/i, '').replace(/-/g, '').toLowerCase()
+  if (!/^[0-9a-f]{8,32}$/.test(raw)) return null
+  const matches = all.filter((x) =>
+    x.sourceId?.replace(/-/g, '').toLowerCase().startsWith(raw),
+  )
+  // 複数一致＝プレフィックス衝突。当てずっぽうで別素材を見せない安全側。
+  return matches.length === 1 ? matches[0] : null
 }
 
 function Fact({ label, value }: { label: string; value?: string }) {
