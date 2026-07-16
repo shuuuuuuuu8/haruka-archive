@@ -104,7 +104,7 @@ export function mapRow(m: MusubiMaterialRow): Material {
   const imageUrls =
     images.length > 0
       ? images.map((img) => getMusubiImageUrl(img.storage_path))
-      : ['/placeholder-material.jpg']
+      : ['/placeholder-material.svg']
 
   const category = ITEM_CATEGORY_MAP[m.category] ?? 'その他'
 
