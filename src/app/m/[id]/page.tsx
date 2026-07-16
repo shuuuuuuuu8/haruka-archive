@@ -17,15 +17,24 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const m = await fetchMusubiMaterialByProvenanceId(id)
+  const m = await resolveProvenanceMaterial(id)
   if (!m) return { title: '素材が見つかりません', robots: { index: false, follow: false } }
-  const title = `${m.name}の来歴 | 結 素材バンク`
+  const title = `${m.name}の来歴`
   const description = `${m.name}（${m.materialType}・${m.origin}）の素材の履歴。${m.story ? m.story.slice(0, 80) : ''}`
   return {
     title,
     description,
     openGraph: { title, description, type: 'article', images: [{ url: m.images[0], alt: m.name }] },
   }
+}
+
+// 来歴解決：まず service-role で（成約済みも含め）引く。キー未設定や取得失敗時は、
+// 公開一覧（is_available=true）へフォールバックして、公開中の素材は必ず表示できるようにする。
+async function resolveProvenanceMaterial(id: string) {
+  const viaService = await fetchMusubiMaterialByProvenanceId(id)
+  if (viaService) return viaService
+  const all = await getAllMaterials()
+  return all.find((x) => x.id === id) ?? null
 }
 
 function Fact({ label, value }: { label: string; value?: string }) {
@@ -40,7 +49,7 @@ function Fact({ label, value }: { label: string; value?: string }) {
 
 export default async function ProvenancePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const m = await fetchMusubiMaterialByProvenanceId(id)
+  const m = await resolveProvenanceMaterial(id)
   if (!m) notFound()
 
   // 来歴ページは丸めない生の年代を優先（例「昭和30年代」）。無ければ粗い列挙を補助的に。

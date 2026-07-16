@@ -11,6 +11,21 @@ import { QUANTITY_SIZE_LABELS } from '@/types/material'
 export const revalidate = 300
 export const dynamicParams = true
 
+// 内部フィールドキー → 表示用の日本語ラベル。未知キーはそのまま出さず除外する。
+const FIELD_LABELS: Record<string, string> = {
+  category: '種類',
+  materialType: '素材種別',
+  supplier: '提供元',
+  origin: '産地',
+  era: '年代',
+  quantity: '数量',
+  story: '背景',
+  pattern: '柄',
+  color: '色',
+}
+
+const fieldLabel = (field: string): string | null => FIELD_LABELS[field] ?? null
+
 export async function generateStaticParams() {
   const materials = await getAllMaterials()
   return materials.map((material) => ({ id: material.id }))
@@ -148,15 +163,18 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
 
             {(material.verifiedFields.length > 0 || material.pendingFields.length > 0 || material.estimatedFields.length > 0) && (
               <div className="mt-8 flex flex-wrap gap-2">
-                {material.verifiedFields.map((field) => (
-                  <VerifiedBadge key={field} type="verified" label={field} />
-                ))}
-                {material.pendingFields.map((field) => (
-                  <VerifiedBadge key={field} type="pending" label={field} />
-                ))}
-                {material.estimatedFields.map((field) => (
-                  <VerifiedBadge key={field} type="estimated" label={field} />
-                ))}
+                {material.verifiedFields.map((field) => {
+                  const label = fieldLabel(field)
+                  return label ? <VerifiedBadge key={field} type="verified" label={label} /> : null
+                })}
+                {material.pendingFields.map((field) => {
+                  const label = fieldLabel(field)
+                  return label ? <VerifiedBadge key={field} type="pending" label={label} /> : null
+                })}
+                {material.estimatedFields.map((field) => {
+                  const label = fieldLabel(field)
+                  return label ? <VerifiedBadge key={field} type="estimated" label={label} /> : null
+                })}
               </div>
             )}
 

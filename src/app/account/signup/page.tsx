@@ -17,7 +17,7 @@ export default async function BuyerSignupPage({
           <p className="text-xs tracking-[0.24em]" style={{ color: 'var(--accent)' }}>結 素材バンク</p>
           <h1 className="mt-1 font-serif text-2xl">新規登録</h1>
           <p className="mt-2 text-xs leading-5" style={{ color: 'var(--text-muted)' }}>
-            素材の相談・購入に使えます。閲覧だけなら登録不要です。
+            素材のご相談に使えます。閲覧だけなら登録不要です。
           </p>
         </div>
         <AuthForm mode="signup" next={safeNext} />

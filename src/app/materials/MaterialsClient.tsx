@@ -31,6 +31,35 @@ function toggle<T>(arr: T[] | undefined, val: T): T[] {
   return current.includes(val) ? current.filter((item) => item !== val) : [...current, val]
 }
 
+// 絞り込み状態を URL クエリと相互変換し、検索結果を共有・ブックマーク・戻る操作できるようにする。
+const ARRAY_FILTER_KEYS = ['category', 'materialType', 'origin', 'era', 'color', 'quantitySize', 'priceRange'] as const
+
+function stateToSearch(filters: MaterialFilters, query: string): string {
+  const params = new URLSearchParams()
+  for (const key of ARRAY_FILTER_KEYS) {
+    const vals = filters[key] as string[] | undefined
+    if (vals && vals.length > 0) params.set(key, vals.join(','))
+  }
+  if (filters.sampleAvailable) params.set('sample', '1')
+  if (query.trim()) params.set('q', query.trim())
+  const s = params.toString()
+  return s ? `?${s}` : ''
+}
+
+function searchToState(search: string): { filters: MaterialFilters; query: string; hasAny: boolean } {
+  const params = new URLSearchParams(search)
+  const filters: Record<string, unknown> = {}
+  for (const key of ARRAY_FILTER_KEYS) {
+    const raw = params.get(key)
+    if (raw) {
+      const vals = raw.split(',').filter(Boolean)
+      if (vals.length > 0) filters[key] = vals
+    }
+  }
+  if (params.get('sample') === '1') filters.sampleAvailable = true
+  return { filters: filters as MaterialFilters, query: params.get('q') ?? '', hasAny: [...params.keys()].length > 0 }
+}
+
 // AI相談のフローティングボタン＋チャット本体（カテゴリ画面・一覧の両方に表示）
 function ChatLauncher({ materials, open, onOpen, onClose }: { materials: Material[]; open: boolean; onOpen: () => void; onClose: () => void }) {
   return (
@@ -77,18 +106,34 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
   const [requestOpen, setRequestOpen] = useState(false)
   // カテゴリー選択画面 → 一覧 の2段階。最初はカテゴリー選択を表示する。
   const [entered, setEntered] = useState(false)
+  // URLからの初期化が終わるまでURLへの書き戻しを止め、初期クエリの取りこぼしを防ぐ。
+  const [hydrated, setHydrated] = useState(false)
   const hasFilters = Object.values(filters).some((value) => value !== undefined && (!Array.isArray(value) || value.length > 0))
 
+  // 初期化：URLクエリ（?category=、?color= など）から絞り込み状態を復元する。
   useEffect(() => {
-    const category = new URLSearchParams(window.location.search).get('category')
-    const categories = new Set(initialMaterials.map((material) => material.category))
+    const validCategories = new Set(initialMaterials.map((material) => material.category))
+    const { filters: parsed, query: parsedQuery, hasAny } = searchToState(window.location.search)
 
-    // ?category= 付きで来た場合は、その種類で絞り込んで一覧へ直行する
-    if (category && categories.has(category as MaterialCategory)) {
-      setFilters((current) => ({ ...current, category: [category as MaterialCategory] }))
+    if (parsed.category) {
+      parsed.category = parsed.category.filter((c) => validCategories.has(c as MaterialCategory)) as MaterialCategory[]
+      if (parsed.category.length === 0) delete parsed.category
+    }
+
+    if (hasAny) {
+      setFilters(parsed)
+      setQuery(parsedQuery)
       setEntered(true)
     }
+    setHydrated(true)
   }, [initialMaterials])
+
+  // 書き戻し：絞り込み状態が変わるたびにURLを更新（履歴は積まずreplace）。
+  useEffect(() => {
+    if (!hydrated) return
+    const url = entered ? `/materials${stateToSearch(filters, query)}` : '/materials'
+    window.history.replaceState(null, '', url)
+  }, [filters, query, entered, hydrated])
 
   // データに実在するカテゴリーだけを、代表画像・点数付きで集計する
   const categoryGroups = useMemo(() => {
@@ -168,8 +213,10 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
               MATERIAL ARCHIVE
             </p>
             <h1 className="font-serif text-3xl font-medium sm:text-4xl">種類から探す</h1>
-            <p className="mx-auto mt-4 max-w-xl text-sm leading-7" style={{ color: 'var(--text-muted)' }}>
-              お探しの素材の種類をお選びください。次の画面で、色や用途などからさらに絞り込めます。
+            <p className="mx-auto mt-4 max-w-xl text-pretty text-sm leading-7" style={{ color: 'var(--text-muted)' }}>
+              お探しの素材の種類をお選びください。
+              <wbr />
+              次の画面で、色や用途などからさらに絞り込めます。
             </p>
             <div className="mt-6 flex justify-center">
               <button
