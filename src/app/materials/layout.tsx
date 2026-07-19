@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     canonical: '/materials',
   },
   openGraph: {
-    title: '素材を探す | 結 素材バンク',
+    title: '素材を探す | 結',
     description:
       '老舗や職人工房に眠る未活用素材・デッドストック素材を、種類・素材・色柄・数量から探せる素材検索ページです。',
     url: '/materials',

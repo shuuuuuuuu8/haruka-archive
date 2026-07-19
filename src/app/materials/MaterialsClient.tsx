@@ -312,7 +312,7 @@ export default function MaterialsClient({ initialMaterials }: { initialMaterials
               </p>
               <h1 className="text-2xl font-medium sm:text-3xl">未活用素材を探す</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7" style={{ color: 'var(--text-muted)' }}>
-                未活用素材・デッドストック素材を、種類・色・用途・背景から探せます。購入ボタンは置かず、気になる素材を遙へ相談するための素材バンクです。
+                未活用素材・デッドストック素材を、種類・色・用途・背景から探せます。購入ボタンは置かず、気になる素材を遙へ相談するための場です。
               </p>
             </div>
             <div className="relative">

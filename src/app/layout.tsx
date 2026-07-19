@@ -4,18 +4,22 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.musubi-sozaibank.com'
-const siteName = '結 素材バンク'
+const siteName = '結'
 const siteDescription =
-  '結び素材バンク（MUSUBI素材バンク）は、日本各地の老舗や職人工房に眠る未活用素材・デッドストック素材を探せる素材検索プラットフォームです。着物・反物・帯地・古布・工芸素材のサンプル相談・ロット相談を遙が仲介します。'
+  '結（むすび）は、日本各地の老舗や職人工房に眠る未活用素材・デッドストック素材を探せる素材検索プラットフォームです。着物・反物・帯地・古布・工芸素材のサンプル相談・ロット相談を遙が仲介します。'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${siteName}（結び素材バンク）| 日本に眠る素材を、次のつくり手へ`,
+    default: `${siteName}（むすび）| 日本に眠る素材を、次のつくり手へ`,
     template: `%s | ${siteName}`,
   },
   description: siteDescription,
   keywords: [
+    '結',
+    'むすび',
+    'MUSUBI',
+    // 旧名称（検索流入の継続用に残す）
     '結び素材バンク',
     '結素材バンク',
     'MUSUBI素材バンク',
@@ -77,7 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         '@type': 'WebSite',
         '@id': `${siteUrl}/#website`,
         name: siteName,
-        alternateName: ['結び素材バンク', 'MUSUBI素材バンク', 'musubi sozai bank'],
+        alternateName: ['むすび', 'MUSUBI', '結 素材バンク', '結び素材バンク', 'MUSUBI素材バンク', 'musubi sozai bank'],
         url: siteUrl,
         description: siteDescription,
         inLanguage: 'ja',

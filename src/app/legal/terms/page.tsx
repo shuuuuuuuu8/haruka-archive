@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: '利用規約',
-  description: '結 素材バンク（合同会社遙）の利用規約です。',
+  description: '結（合同会社遙）の利用規約です。',
   alternates: { canonical: '/legal/terms' },
 }
 
@@ -18,7 +18,7 @@ export default function TermsPage() {
 
         <div className="mt-8 space-y-8 text-sm leading-7" style={{ color: 'var(--text)' }}>
           <p style={{ color: 'var(--text-muted)' }}>
-            本利用規約（以下「本規約」）は、合同会社遙（以下「当社」）が提供する「結 素材バンク」および関連サービス（以下「本サービス」）の利用条件を定めるものです。利用者は、本サービスを利用することにより本規約に同意したものとみなされます。
+            本利用規約（以下「本規約」）は、合同会社遙（以下「当社」）が提供する「結」および関連サービス（以下「本サービス」）の利用条件を定めるものです。利用者は、本サービスを利用することにより本規約に同意したものとみなされます。
           </p>
 
           <section>

@@ -11,7 +11,7 @@ const NAV = [
   { href: '/materials', label: '素材を探す' },
   { href: '/partners', label: '提供元' },
   { href: '/inquiry', label: '相談する' },
-  { href: '/about', label: '素材バンク' },
+  { href: '/about', label: '結とは' },
 ]
 
 export default function Header() {
@@ -73,13 +73,13 @@ export default function Header() {
             className="font-serif text-lg font-medium tracking-[0.18em]"
             style={{ color: dark ? 'rgba(255,255,255,0.85)' : 'var(--text)', transition: 'color 0.4s ease' }}
           >
-            結 素材バンク
+            結
           </span>
           <span
             className="hidden text-[10px] tracking-[0.24em] uppercase sm:block"
             style={{ color: dark ? 'rgba(255,255,255,0.3)' : 'var(--text-muted)', transition: 'color 0.4s ease' }}
           >
-            Musubi Material Bank
+            Musubi
           </span>
         </Link>
 

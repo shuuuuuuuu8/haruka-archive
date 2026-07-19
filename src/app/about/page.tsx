@@ -5,9 +5,9 @@ import { MATERIALS, PARTNERS } from '@/lib/data'
 import type { MaterialCategory } from '@/types/material'
 
 export const metadata: Metadata = {
-  title: '素材バンクについて',
+  title: '結とは',
   description:
-    '遙 素材バンクは、日本各地の老舗や職人工房に眠る未活用素材・デッドストック素材をデータ化し、企業や個人デザイナーが目的に合った素材を探せる素材検索プラットフォームです。',
+    '結（むすび）は、日本各地の老舗や職人工房に眠る未活用素材・デッドストック素材をデータ化し、企業や個人デザイナーが目的に合った素材を探せる素材検索プラットフォームです。',
   alternates: {
     canonical: '/about',
   },
@@ -34,14 +34,14 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#1d1c19]/90 via-[#1d1c19]/65 to-[#1d1c19]/20" />
         <div className="relative mx-auto grid min-h-[620px] max-w-7xl items-center px-4 pb-20 sm:px-6 lg:grid-cols-[1fr_420px]">
           <div className="max-w-3xl pt-16 text-white">
-            <p className="mb-5 text-xs tracking-[0.28em] text-white/75">MUSUBI MATERIAL BANK</p>
+            <p className="mb-5 text-xs tracking-[0.28em] text-white/75">MUSUBI</p>
             <h1 className="text-4xl font-medium leading-tight sm:text-5xl lg:text-6xl">
               日本に眠る素材を、
               <br />
               次のつくり手へ。
             </h1>
             <p className="mt-7 max-w-2xl text-sm leading-8 text-white/82">
-              老舗や職人工房に眠る未活用素材・デッドストック素材をデータ化し、企業や個人デザイナーが必要な素材をすぐに見つけられる素材バンクです。
+              老舗や職人工房に眠る未活用素材・デッドストック素材をデータ化し、企業や個人デザイナーが必要な素材をすぐに見つけられるプラットフォームです。
             </p>
             <p className="mt-4 max-w-2xl text-xs leading-7 text-white/72">
               素材を持つ老舗と、素材を探す企業・個人デザイナーを、遙が間に入ってつなぎます。
@@ -94,7 +94,7 @@ export default function Home() {
           </div>
           <div className="space-y-5 text-sm leading-8" style={{ color: 'var(--text-muted)' }}>
             <p>
-              遙 素材バンクは、日本各地の老舗や職人工房に眠る未活用素材・デッドストック素材をデータ化し、企業や個人デザイナーが目的に合った素材を探せる素材検索プラットフォームです。
+              結（むすび）は、日本各地の老舗や職人工房に眠る未活用素材・デッドストック素材をデータ化し、企業や個人デザイナーが目的に合った素材を探せる素材検索プラットフォームです。
             </p>
             <p>
               これまで外部から見えにくかった反物・帯地・古布・和紙・工芸素材などを、種類・色柄・数量・産地・年代・背景ストーリーごとに整理して掲載します。

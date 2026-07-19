@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'プライバシーポリシー',
-  description: '結 素材バンク（合同会社遙）のプライバシーポリシー（個人情報の取り扱い）です。',
+  description: '結（合同会社遙）のプライバシーポリシー（個人情報の取り扱い）です。',
   alternates: { canonical: '/legal/privacy' },
 }
 
@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
 
         <div className="mt-8 space-y-8 text-sm leading-7" style={{ color: 'var(--text)' }}>
           <p style={{ color: 'var(--text-muted)' }}>
-            合同会社遙（以下「当社」）は、当社が運営する「結 素材バンク」および関連サービス（以下「本サービス」）における利用者の個人情報を、以下の方針に基づき適切に取り扱います。
+            合同会社遙（以下「当社」）は、当社が運営する「結」および関連サービス（以下「本サービス」）における利用者の個人情報を、以下の方針に基づき適切に取り扱います。
           </p>
 
           <section>

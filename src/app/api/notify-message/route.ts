@@ -105,13 +105,13 @@ export async function POST(req: NextRequest) {
     }
     const sendResult = await sendEmail(
       email,
-      `【結 素材バンク】「${materialName}」に新しいメッセージ`,
+      `【結】「${materialName}」に新しいメッセージ`,
       `<div style="font-family:sans-serif;line-height:1.8;color:#1a1a1a">
         <p>「<strong>${name}</strong>」のやり取りに新しいメッセージが届きました。</p>
         <blockquote style="margin:12px 0;padding:8px 14px;border-left:3px solid #c49a5a;color:#555">${snippet}</blockquote>
         <p><a href="${t.link}" style="color:#b3672a">メッセージを確認する →</a></p>
         <hr style="border:none;border-top:1px solid #eee;margin:20px 0"/>
-        <p style="font-size:12px;color:#999">結 素材バンク</p>
+        <p style="font-size:12px;color:#999">結</p>
       </div>`,
     )
     results.push(`${maskEmail(email)}=${sendResult}`)

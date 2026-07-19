@@ -176,7 +176,7 @@ export default async function ProvenancePage({ params }: { params: Promise<{ id:
         {/* フッター（控えめ・販売導線ではない） */}
         <div className="mt-12 border-t pt-6 text-center" style={{ borderColor: 'var(--border)' }}>
           <p className="text-xs leading-7" style={{ color: 'var(--text-muted)' }}>
-            この素材は<span style={{ color: 'var(--text)' }}>結 素材バンク</span>に記録された、
+            この素材は<span style={{ color: 'var(--text)' }}>結</span>に記録された、
             <br className="sm:hidden" />
             日本の老舗・職人の未活用素材です。
           </p>
