@@ -1,6 +1,6 @@
 import { createBrowserClient } from '@supabase/ssr'
 
-// 買い手の認証は、素材・会話と同じ MUSUBI Supabase（nzlxwskzszpscnbjkqfn）で行う。
+// 買い手の認証は、素材・会話と同じ MUSUBI Supabaseで行う。
 // 認証とデータが同一プロジェクトに無いと RLS（auth.uid()）が機能しないため。
 export function createBuyerClient() {
   return createBrowserClient(

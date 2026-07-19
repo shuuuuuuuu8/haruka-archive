@@ -54,7 +54,9 @@ export async function POST(req: NextRequest) {
   const supabase = createServiceClient()
   const { data: conv, error: convError } = await supabase
     .from('conversations')
-    .select('id, materials(name), buyer_profiles(user_id), supplier_profiles(user_id)')
+    .select(
+      'id, materials(name), buyer_profiles(user_id, display_name), supplier_profiles(user_id, display_name)',
+    )
     .eq('id', record.conversation_id)
     .single()
   if (convError) {
@@ -69,9 +71,19 @@ export async function POST(req: NextRequest) {
   if (!conv) return NextResponse.json({ ok: true, stage: 'conv-not-found' })
 
   const materialName = (conv.materials as { name?: string } | null)?.name ?? '素材'
-  const buyerUserId = (conv.buyer_profiles as { user_id?: string } | null)?.user_id
-  const supplierUserId = (conv.supplier_profiles as { user_id?: string } | null)?.user_id
+  const buyerProfile = conv.buyer_profiles as { user_id?: string; display_name?: string } | null
+  const supplierProfile = conv.supplier_profiles as { user_id?: string; display_name?: string } | null
+  const buyerUserId = buyerProfile?.user_id
+  const supplierUserId = supplierProfile?.user_id
   const buyerSite = new URL(req.url).origin // この受け口は買い手サイト上にある
+
+  // 「誰からの返信か」を件名・本文で明示する（同じ件名のメールが並ぶと区別できない）
+  const senderLabel =
+    record.sender_role === 'buyer'
+      ? `買い手・${buyerProfile?.display_name ?? '匿名'}さん`
+      : record.sender_role === 'supplier'
+        ? `提供元・${supplierProfile?.display_name ?? '不明'}さん`
+        : '運営（遙）'
 
   // 送信者の反対側に通知（admin発は両者へ）
   const targets: Array<{ userId: string; link: string }> = []
@@ -105,13 +117,13 @@ export async function POST(req: NextRequest) {
     }
     const sendResult = await sendEmail(
       email,
-      `【結】「${materialName}」に新しいメッセージ`,
+      `【結】${senderLabel}から「${materialName}」に新しいメッセージ`,
       `<div style="font-family:sans-serif;line-height:1.8;color:#1a1a1a">
-        <p>「<strong>${name}</strong>」のやり取りに新しいメッセージが届きました。</p>
+        <p>「<strong>${name}</strong>」のやり取りに、<strong>${escapeHtml(senderLabel)}</strong>から新しいメッセージが届きました。</p>
         <blockquote style="margin:12px 0;padding:8px 14px;border-left:3px solid #c49a5a;color:#555">${snippet}</blockquote>
-        <p><a href="${t.link}" style="color:#b3672a">メッセージを確認する →</a></p>
+        <p><a href="${t.link}" style="color:#b3672a">メッセージを確認して返信する →</a></p>
         <hr style="border:none;border-top:1px solid #eee;margin:20px 0"/>
-        <p style="font-size:12px;color:#999">結</p>
+        <p style="font-size:12px;color:#999">結（運営: 合同会社遙）<br/>※このメールに直接返信しても相手には届きません。上のリンクからご返信ください。</p>
       </div>`,
     )
     results.push(`${maskEmail(email)}=${sendResult}`)
