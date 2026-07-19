@@ -131,7 +131,8 @@ export function mapRow(m: MusubiMaterialRow): Material {
     era: mapEra(m.era),
     eraText: m.era ?? undefined,
     regionText: m.region ?? undefined,
-    supplier: 'MUSUBI素材',
+    // 提供元は実際の店名（お店の名前・屋号＝公開前提）。無ければサービス名。
+    supplier: m.supplier_profiles?.display_name ?? '結',
     supplierName: m.supplier_profiles?.display_name ?? undefined,
     attributes: (m.attributes as Material['attributes']) ?? undefined,
     quantity: m.quantity,
@@ -146,7 +147,6 @@ export function mapRow(m: MusubiMaterialRow): Material {
     tags: [
       categoryLabels[m.category] ?? 'その他',
       fabricLabels[m.fabric_type] ?? '不明',
-      'MUSUBI素材',
       ...(m.region ? [m.region] : []),
     ],
     sampleAvailable: false,
