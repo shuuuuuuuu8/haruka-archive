@@ -94,7 +94,9 @@ export function ChatThread({
           </p>
         )}
         {messages.map((m) => {
-          const mine = m.sender_id === currentUserId
+          // 役割で判定（同一アカウントが買い手と提供元を兼ねられるため、
+          // IDで判定すると相手の発言まで全部「自分」になる）
+          const mine = m.sender_role === 'buyer'
           return (
             <div key={m.id} className={mine ? 'flex flex-col items-end' : 'flex flex-col items-start'}>
               {!mine && (
