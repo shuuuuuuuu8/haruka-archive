@@ -8,7 +8,7 @@ import { ContactButton } from '@/components/materials/ContactButton'
 import { getAllMaterials } from '@/lib/get-materials'
 import { QUANTITY_SIZE_LABELS } from '@/types/material'
 
-export const revalidate = 300
+export const revalidate = 60
 export const dynamicParams = true
 
 // 内部フィールドキー → 表示用の日本語ラベル。未知キーはそのまま出さず除外する。

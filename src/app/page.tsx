@@ -2,7 +2,7 @@ import { getAllMaterials } from '@/lib/get-materials'
 import HomeLanding, { type FeaturedMaterial, type ShowcaseItem } from './HomeLanding'
 
 // ISR: 提供元が登録した素材を定期的に再取得して反映（5分ごと）
-export const revalidate = 300
+export const revalidate = 60
 
 function pickFeatured(
   materials: Awaited<ReturnType<typeof getAllMaterials>>,
