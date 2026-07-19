@@ -14,20 +14,26 @@ import { createServiceClient } from '@/lib/notify/service-client'
 // 登録時に選んだ種類をそのままカテゴリーとして使う。
 const ITEM_CATEGORY_MAP: Record<string, MaterialCategory> = {
   kimono: '着物',
+  furisode: '振袖',
+  nagajuban: '長襦袢',
   obi: '帯',
   tanmono: '反物',
   haori: '羽織',
   hakama: '袴',
+  shichigosan: '七五三',
   accessories: '小物',
   other: 'その他',
 }
 
 const categoryLabels: Record<string, string> = {
   kimono: '着物',
+  furisode: '振袖',
+  nagajuban: '長襦袢',
   obi: '帯',
   tanmono: '反物',
   haori: '羽織',
   hakama: '袴',
+  shichigosan: '七五三',
   accessories: '小物',
   other: 'その他',
 }
@@ -37,6 +43,8 @@ const fabricLabels: Record<string, string> = {
   cotton: '綿',
   linen: '麻',
   wool: 'ウール',
+  polyester: 'ポリエステル',
+  rayon: 'レーヨン',
   synthetic: '化繊',
   mixed: '混紡',
   unknown: '不明',

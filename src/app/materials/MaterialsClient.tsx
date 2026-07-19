@@ -15,7 +15,7 @@ const QUICK_COLORS: ColorGroup[] = ['白系', '黒系', '藍系', '赤系', '金
 const SEARCH_FLOW = ['素材を探す', '候補を比較する', 'サンプル・ロットを相談する']
 
 // カテゴリー選択画面の表示順（登録時の種類）と短い説明
-const CATEGORY_ORDER: MaterialCategory[] = ['着物', '帯', '反物', '羽織', '袴', '小物', 'その他']
+const CATEGORY_ORDER: MaterialCategory[] = ['着物', '振袖', '長襦袢', '帯', '反物', '羽織', '袴', '七五三', '小物', 'その他']
 const CATEGORY_DESC: Partial<Record<MaterialCategory, string>> = {
   着物: '着物・きもの',
   帯: '帯・帯地',
