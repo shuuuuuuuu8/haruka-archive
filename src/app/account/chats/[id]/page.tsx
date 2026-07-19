@@ -20,7 +20,7 @@ export default async function ChatThreadPage({
 
   const { data: conversation } = await supabase
     .from('conversations')
-    .select('id, status, material_id, materials(name)')
+    .select('id, status, material_id, materials(name), buyer_profiles(display_name), supplier_profiles(display_name)')
     .eq('id', id)
     .maybeSingle()
 
@@ -34,6 +34,10 @@ export default async function ChatThreadPage({
 
   const materialName =
     (conversation.materials as { name?: string } | null)?.name ?? '素材'
+  const buyerName =
+    (conversation.buyer_profiles as { display_name?: string } | null)?.display_name ?? 'あなた'
+  const supplierName =
+    (conversation.supplier_profiles as { display_name?: string } | null)?.display_name ?? '提供元'
 
   return (
     <main className="pt-16" style={{ backgroundColor: '#fbfaf7' }}>
@@ -56,6 +60,8 @@ export default async function ChatThreadPage({
           conversationId={conversation.id}
           currentUserId={user.id}
           initialMessages={(messages ?? []) as ChatMessage[]}
+          buyerName={buyerName}
+          supplierName={supplierName}
         />
       </div>
     </main>

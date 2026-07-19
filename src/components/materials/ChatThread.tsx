@@ -13,21 +13,25 @@ export type ChatMessage = {
   created_at: string
 }
 
-const ROLE_LABEL: Record<ChatMessage['sender_role'], string> = {
-  buyer: 'あなた',
-  supplier: '提供元',
-  admin: '遙（運営）',
-}
-
 export function ChatThread({
   conversationId,
   currentUserId,
   initialMessages,
+  buyerName,
+  supplierName,
 }: {
   conversationId: string
   currentUserId: string
   initialMessages: ChatMessage[]
+  buyerName: string
+  supplierName: string
 }) {
+  // 役割ごとの表示名（アカウント名）。運営は固定表記。
+  const roleName: Record<ChatMessage['sender_role'], string> = {
+    buyer: buyerName,
+    supplier: supplierName,
+    admin: '遙（運営）',
+  }
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
@@ -99,11 +103,10 @@ export function ChatThread({
           const mine = m.sender_role === 'buyer'
           return (
             <div key={m.id} className={mine ? 'flex flex-col items-end' : 'flex flex-col items-start'}>
-              {!mine && (
-                <span className="mb-0.5 text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                  {ROLE_LABEL[m.sender_role]}
-                </span>
-              )}
+              {/* 送信者のアカウント名を常に表示（自分の分も） */}
+              <span className="mb-0.5 px-1 text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                {roleName[m.sender_role]}
+              </span>
               <div
                 className="max-w-[85%] whitespace-pre-wrap px-3.5 py-2.5 text-sm leading-6"
                 style={
