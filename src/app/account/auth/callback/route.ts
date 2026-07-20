@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const nextParam = searchParams.get('next')
-  const next = nextParam && nextParam.startsWith('/') ? nextParam : '/account/chats'
+  const next = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//') && !nextParam.startsWith('/\\') ? nextParam : '/account/chats'
 
   if (code) {
     const supabase = await createBuyerServerClient()

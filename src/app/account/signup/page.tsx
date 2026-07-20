@@ -8,7 +8,7 @@ export default async function BuyerSignupPage({
   searchParams: Promise<{ next?: string }>
 }) {
   const { next } = await searchParams
-  const safeNext = next && next.startsWith('/') ? next : '/materials'
+  const safeNext = next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\') ? next : '/materials'
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 pt-16" style={{ backgroundColor: '#fbfaf7' }}>

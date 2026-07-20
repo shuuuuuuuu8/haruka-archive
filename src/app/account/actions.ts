@@ -12,7 +12,17 @@ export type AuthState = {
 
 // オープンリダイレクト防止：サイト内の相対パスのみ許可
 function safeNext(next: string | undefined): string {
-  return next && next.startsWith('/') ? next : '/materials'
+  // オープンリダイレクト対策: サイト内の相対パスのみ許可。
+  // "//evil.com"（プロトコル相対）や "/\evil.com" は外部遷移になるため弾く。
+  if (
+    next &&
+    next.startsWith('/') &&
+    !next.startsWith('//') &&
+    !next.startsWith('/\\')
+  ) {
+    return next
+  }
+  return '/materials'
 }
 
 // 英語エラーを日本語へ
