@@ -63,6 +63,16 @@ export async function POST(req: NextRequest) {
   if (!Array.isArray(messages) || messages.length === 0) {
     return NextResponse.json({ error: 'メッセージがありません' }, { status: 400 })
   }
+  // このAIチャットは未ログインの買い手が素材を探すための公開機能。
+  // ログイン必須にすると発見動線が壊れるため、認証ではなく入力量で
+  // 濫用（OpenAI課金の悪用）を抑える: メッセージ数と各本文長を制限。
+  if (messages.length > 30) {
+    return NextResponse.json({ error: 'メッセージが多すぎます' }, { status: 400 })
+  }
+  const totalChars = messages.reduce((n, m) => n + String(m?.content ?? '').length, 0)
+  if (totalChars > 8000) {
+    return NextResponse.json({ error: '入力が長すぎます。短くしてお試しください' }, { status: 400 })
+  }
 
   // APIキーが無い場合は実行時に丁寧なエラーを返す（ビルドはクラッシュさせない）
   const apiKey = process.env.OPENAI_API_KEY
